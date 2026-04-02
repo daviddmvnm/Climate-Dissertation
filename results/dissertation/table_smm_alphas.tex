@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{SMM Alpha Parameter Estimates vs.\ Scenario Starting Points}
+\label{tab:smm_alphas}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Param.} & \textbf{Description} & \textbf{Scen. A} & \textbf{Scen. B} & \textbf{Scen. C} & \textbf{Default} & \textbf{SMM Est.} \\
+\midrule
+$\alpha_c$ & Transition cost scaling & 3.50 & 2.00 & 2.00 & 3.00 & \textbf{1.8958} \\
+$\alpha_d$ & Climate damage scaling & 0.30 & 0.15 & 0.30 & 0.25 & \textbf{0.3381} \\
+$\alpha_p$ & Political pressure scaling & 0.50 & 2.50 & 0.50 & 1.50 & \textbf{0.5146} \\
+$\alpha_b$ & Coordination benefit scaling & 3.00 & 1.00 & 1.00 & 2.00 & \textbf{1.0796} \\
+\bottomrule
+\multicolumn{7}{p{14cm}}{\footnotesize \textit{Note:} SMM estimates from Nelder-Mead optimisation, best of 4 starting points. Fixed parameters: $\lambda=1.54$, $\eta=15.0$, $\kappa=0.05$, $\delta_{EU}=0.85$, $\delta_{US}=0.75$, $\delta_{CN}=0.80$, $\delta_{RoW}=0.65$.}
+\\
+\end{tabular}
+\end{table}

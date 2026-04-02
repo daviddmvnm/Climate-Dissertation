@@ -1,0 +1,19 @@
+counterfactual,parameter,outcome,rho,pvalue,sign,significant
+CF1: Baseline,λ_CN,fm_CN,-0.8622,0.0,−,True
+CF1: Baseline,λ_CN,fm_US,0.3287,0.0,+,True
+CF1: Baseline,λ_CN,success_rate,-0.4128,0.0,−,True
+CF1: Baseline,λ_US,fm_CN,0.4445,0.0,+,True
+CF1: Baseline,λ_US,fm_US,-0.8412,0.0,−,True
+CF1: Baseline,λ_US,success_rate,-0.5197,0.0,−,True
+CF2: Full US↔CN swap,λ_CN,fm_CN,-0.8281,0.0,−,True
+CF2: Full US↔CN swap,λ_CN,fm_US,0.4175,0.0,+,True
+CF2: Full US↔CN swap,λ_CN,success_rate,-0.4977,0.0,−,True
+CF2: Full US↔CN swap,λ_US,fm_CN,0.3732,0.0,+,True
+CF2: Full US↔CN swap,λ_US,fm_US,-0.8774,0.0,−,True
+CF2: Full US↔CN swap,λ_US,success_rate,-0.4531,0.0,−,True
+CF3: Patience-only swap,λ_CN,fm_CN,-0.9181,0.0,−,True
+CF3: Patience-only swap,λ_CN,fm_US,0.5248,0.0,+,True
+CF3: Patience-only swap,λ_CN,success_rate,-0.083,0.063688,−,False
+CF3: Patience-only swap,λ_US,fm_CN,0.2713,0.0,+,True
+CF3: Patience-only swap,λ_US,fm_US,-0.5415,0.0,−,True
+CF3: Patience-only swap,λ_US,success_rate,-0.1356,0.002376,−,True

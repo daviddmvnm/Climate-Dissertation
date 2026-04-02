@@ -1,0 +1,27 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{SMM Baseline: Monte Carlo Diagnostics ($n=1000$, seed 42)}
+\label{tab:baseline_diagnostics}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Coordination success rate & 0.636 \\
+Mean final coalition weight $W$ & 0.5624 \\
+Median final coalition weight $W$ & 0.8344 \\
+10th / 90th percentile $W$ & 0.0000 / 0.8344 \\
+Mean coordination period (successful runs) & 3.50 \\
+\midrule
+$\sigma_{EU,1}$ (period-1 adoption prob.) & 0.3557 \\
+$\sigma_{US,1}$ & 0.1872 \\
+$\sigma_{CN,1}$ & 0.0246 \\
+$\sigma_{RoW,1}$ & 0.0000 \\
+EU lead ratio $\sigma_{EU}/\max(\sigma_{US},\sigma_{CN})$ & 1.9008 \\
+\midrule
+P(EU adopts, CN never adopts) & 0.136 \\
+P(EU adopts in $t=1$) & 0.385 \\
+P($W \geq \theta$ at $t \leq 2$) & 0.128 \\
+\bottomrule
+\end{tabular}
+\end{table}

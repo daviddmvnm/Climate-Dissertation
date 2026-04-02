@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.toc
+
+# Large generated outputs (regenerable)
+dissertation.pdf
+diss.pdf
+results/figures/
+results/dissertation/*.png
+
+# Notebooks (outputs can be large)
+*.ipynb
+
+# Misc
+*.zip
+*.mkv
+*.tmp
