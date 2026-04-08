@@ -1,0 +1,14 @@
+\begin{table}[ht]
+\centering
+\caption{Section A — Benefit form robustness: policy-channel 90\%-crossing thresholds under three stabilisation-benefit / coordination-threshold specifications. All SMM parameters held fixed. ``Ranking'' reports Spearman $\rho$ vs.\ Sigmoid baseline.}
+\label{tab:robustness_functional_form}
+\begin{tabular}{llcccccccclc}
+\toprule
+Spec & $S(W)$ formula & $P(\text{success})$ & $\bar{W}$ & $\delta_{CN}$ & $\delta_{US}$ & $\delta_{US}{=}\delta_{CN}$ & Glob.\ cost & $\theta$ & $\gamma$ & Top GSA param & Ranking \\
+\midrule
+  Sigmoid & $\frac{1}{1+e^{-\eta(W-\theta)}}$ & 0.726 & 0.695 & +8.5\% & +10.3\% & +6.8\% & -15.4\% & -6.8\% & +85.4\% & theta & baseline \\
+  Linear & $\mathrm{clip}(W,0,1)$ & 0.581 & 0.660 & — & — & +17.3\% & -24.6\% & — & — & theta & SHIFTED (ρ=0.676) \\
+  Convex & $\mathrm{clip}(W^2,0,1)$ & 0.683 & 0.694 & — & +21.2\% & +6.8\% & -15.4\% & — & +109.1\% & cost_US & SHIFTED (ρ=0.319) \\
+\bottomrule
+\end{tabular}
+\end{table}

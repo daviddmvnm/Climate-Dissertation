@@ -3,17 +3,24 @@ smm_calibration.py
 ──────────────────
 Simulated Method of Moments calibration for the Climate Cooperation Markov Game.
 
-UPDATED MOMENTS:
-  M1: EU - US adoption gap (45.3% - 22.7% = 0.23)
-  M2: Mean adoption period of US | eventually adopting (Target: 3.5 periods)
-      - Sensitive to patience/pressure, less so to t=1 cost.
-  M3: EU lead ratio — σ_EU / max(σ_US, σ_CN) at t=1 (Target: 2.5x)
-  M4: P(0.5 <= W < θ) — "Stuck-in-the-middle" failure mode (Target: 0.15)
-      - Captures when a coalition forms but lacks the final push (benefit/pressure).
+MOMENTS (all analytical — σ at t=1, state G0):
+  M1: EU - US adoption gap                    (Target: 0.25)
+  M2: US period-1 adoption probability        (Target: 0.10)
+  M3: EU lead ratio (EU/US)                   (Target: 2.5)
+  M4: CN period-1 adoption probability        (Target: 0.05)
+  M5: P(zero adoption by period 2)            (Target: 0.15)
+  M6: P(at least 2 blocs adopted by period 3) (Target: 0.60)
 """
 
+import sys
+import os
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+sys.path.insert(0, os.path.join(ROOT_DIR, "core"))
 import warnings
 import numpy as np
+from itertools import product as iproduct
+from functools import lru_cache
 from scipy.optimize import minimize
 
 warnings.filterwarnings("ignore")
@@ -29,22 +36,24 @@ DISCOUNT_FIXED = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.65}
 
 # ── Real-world target moments ──────────────────────────────────────────────
 MOMENTS_DATA = np.array([
-    0.23,   # M1: EU - US adoption gap (0.23)
-    3.50,   # M2: Mean adoption period of US | adopting
-    2.50,   # M3: EU lead ratio (σ_EU / max rival)
-    0.15,   # M4: P(0.5 <= W < θ) - The "stuck" failure mode
+    0.25,   # M1: EU - US adoption gap
+    0.10,   # M2: US period-1 adoption probability
+    2.50,   # M3: EU lead ratio (EU/US)
+    0.05,   # M4: CN period-1 adoption probability
+    0.15,   # M5: P(zero adoption by period 2)
+    0.60,   # M6: P(at least 2 blocs adopted by period 3)
 ])
 
 MOMENT_NAMES = [
     "EU - US adoption gap",
-    "Mean US adoption period | success",
-    "EU lead ratio (σ_EU/max rival)",
-    "P(stuck: 0.5 <= W < θ)",
+    "US period-1 adoption prob",
+    "EU lead ratio (EU/US)",
+    "CN period-1 adoption prob",
+    "P(zero adoption by t=2)",
+    "P(≥2 blocs by t=3)",
 ]
 
-# Weights to normalize scales: M2 (~3.5) and M3 (~2.5) are downweighted 
-# relative to probabilities (M1, M4) to ensure balanced influence.
-MOMENT_WEIGHTS = np.array([1.0, 0.2, 0.2, 1.0])
+MOMENT_WEIGHTS = np.array([1.0, 1.0, 0.0016, 1.0, 1.0, 1.0])  # M3 scaled: (0.1/2.5)^2
 
 # ── Parameter bounds for [α_c, α_d, α_p, α_b] ────────────────────────────
 BOUNDS = [
@@ -74,7 +83,7 @@ def build_smm_params(ac, ad, ap, ab, raw, weights):
 
 def compute_moments(theta, raw, weights, n_mc=N_MC_OPT, seed=MC_SEED):
     """
-    Computes updated M1-M4 moments.
+    Computes M1-M5 moments.
     """
     ac, ad, ap, ab = theta
     params = build_smm_params(ac, ad, ap, ab, raw, weights)
@@ -82,41 +91,52 @@ def compute_moments(theta, raw, weights, n_mc=N_MC_OPT, seed=MC_SEED):
     try:
         V, sigma, _, _ = solve_model(params)
     except Exception:
-        return np.array([1e6, 1e6, 1e6, 1e6])
+        return np.array([1e6, 1e6, 1e6, 1e6, 1e6, 1e6])
 
     G0  = (0, 0, 0, 0)
     idx = {p: i for i, p in enumerate(PLAYERS)}
 
-    # M1 & M3: Analytical from sigma
-    s_EU = sigma[1][G0][idx["EU"]]
-    s_US = sigma[1][G0][idx["US"]]
-    s_CN = sigma[1][G0][idx["CN"]]
-    rival_max = max(s_US, s_CN, 0.001)
+    # All moments analytical from sigma at t=1, state G0
+    s_EU  = sigma[1][G0][idx["EU"]]
+    s_US  = sigma[1][G0][idx["US"]]
+    s_CN  = sigma[1][G0][idx["CN"]]
 
-    m1 = s_EU - s_US
-    m3 = s_EU / rival_max
+    # M5: P(zero adoption by period 2) = P(all delay t=1) * P(all delay t=2 | G0)
+    n = len(PLAYERS)
+    p_all_delay_t1 = float(np.prod([1 - sigma[1][G0][i] for i in range(n)]))
+    p_all_delay_t2 = float(np.prod([1 - sigma[2][G0][i] for i in range(n)]))
+    m5 = p_all_delay_t1 * p_all_delay_t2
 
-    # M2 & M4: Monte Carlo
-    try:
-        W_paths, adopt_time = monte_carlo(V, sigma, params, n_runs=n_mc, seed=seed)
+    m1 = float(s_EU - s_US)
+    m2 = float(s_US)
+    m3 = float(s_EU / s_US) if s_US > 1e-9 else 1e6
+    m4 = float(s_CN)
 
-        # M2: Mean adoption period of US conditional on adopting
-        us_adopt_t = adopt_time[:, idx["US"]]
-        us_success = us_adopt_t[us_adopt_t < np.inf]
-        if len(us_success) > 0:
-            m2 = float(us_success.mean())
-        else:
-            m2 = float(params.T) # Penalty if US never adopts
+    # M6: P(at least 2 blocs adopted by end of period 3) — forward DP
+    dist = {G0: 1.0}
+    for t in range(1, 4):
+        new_dist = {}
+        for G, gprob in dist.items():
+            active = [i for i in range(n) if G[i] == 0]
+            if not active:
+                new_dist[G] = new_dist.get(G, 0.0) + gprob
+                continue
+            for actions in iproduct([0, 1], repeat=len(active)):
+                p_action = 1.0
+                G_next = list(G)
+                for k, i in enumerate(active):
+                    s = float(sigma[t][G][i])
+                    if actions[k] == 1:
+                        p_action *= s
+                        G_next[i] = 1
+                    else:
+                        p_action *= (1 - s)
+                G_next = tuple(G_next)
+                new_dist[G_next] = new_dist.get(G_next, 0.0) + gprob * p_action
+        dist = new_dist
+    m6 = sum(prob for G, prob in dist.items() if sum(G) >= 2)
 
-        # M4: P(0.5 <= W_final < θ) - Stuck in the middle
-        W_final = W_paths[:, -1]
-        stuck = (W_final >= 0.5) & (W_final < params.theta)
-        m4 = float(stuck.mean())
-
-    except Exception:
-        m2, m4 = 1e6, 1e6
-
-    return np.array([m1, m2, m3, m4])
+    return np.array([m1, m2, m3, m4, float(m5), float(m6)])
 
 
 def smm_objective(theta, raw, weights, moments_data=MOMENTS_DATA):
@@ -158,7 +178,7 @@ def run_smm(raw, weights, verbose=True):
 
 if __name__ == "__main__":
     print("Loading data...")
-    bloc_data = build_bloc_data(data_dir=".")
+    bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
     raw = bloc_data.set_index("bloc")
 
     weights_dict = {}
@@ -191,3 +211,6 @@ if __name__ == "__main__":
         print(f"\n⚠ Parameter spread (std): {dict(zip(PARAM_NAMES, spread.round(4)))}")
     else:
         print(f"\n✓ Convergence stable across starting points.")
+
+    np.save(os.path.join(ROOT_DIR, "results", "smm_best_theta.npy"), best.x)
+    print(f"\nSaved best theta → results/smm_best_theta.npy")

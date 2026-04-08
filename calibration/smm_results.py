@@ -5,6 +5,11 @@ Produces all SMM output tables and re-runs key analysis under SMM parameters.
 Run as:  python smm_results.py > smm_output.txt
 """
 
+import sys
+import os
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+sys.path.insert(0, os.path.join(ROOT_DIR, "core"))
 import warnings
 import numpy as np
 warnings.filterwarnings("ignore")
@@ -31,7 +36,7 @@ def section(title):
 
 # ── Setup ──────────────────────────────────────────────────────────────────
 print("Loading data and running SMM...", flush=True)
-bloc_data = build_bloc_data(data_dir=".")
+bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
 raw       = bloc_data.set_index("bloc")
 
 weights = {}
@@ -44,12 +49,9 @@ weights = {k: v / total_w for k, v in weights.items()}
 THETA_ORIG = [BASE_ALPHAS["ac"], BASE_ALPHAS["ad"],
               BASE_ALPHAS["ap"], BASE_ALPHAS["ab"]]
 
-# ── SMM optimisation ───────────────────────────────────────────────────────
-print(f"Optimising (3 scenario starts, n_mc={N_MC_OPT})...", flush=True)
-# Around line 46, after run_smm:
-best, all_results = run_smm(raw, weights, verbose=False)
-# Force selection of the best result even if others failed or diverged
-theta_smm = min(all_results, key=lambda r: r.fun).x
+# ── Load saved SMM result ──────────────────────────────────────────────────
+print("Loading saved SMM calibration...", flush=True)
+theta_smm = np.load(os.path.join(ROOT_DIR, "results", "smm_best_theta.npy"))
 
 # ── Final evaluation at n=1000 ─────────────────────────────────────────────
 print(f"Final evaluation at n_mc={N_MC_FINAL}...", flush=True)

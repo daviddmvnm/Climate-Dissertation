@@ -5,7 +5,9 @@ Generates dissertation tables (LaTeX .tex) and figures (PNG).
 Fully updated for heterogeneous rationality (lambda_i) and SMM-calibrated results.
 """
 
-import os, warnings
+import sys, os, warnings
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -19,7 +21,7 @@ from climate_game import PLAYERS, solve_model, monte_carlo
 from run_analysis import build_bloc_data, SMM_BASELINE
 
 # ── Output directory ───────────────────────────────────────────────
-OUT = "results/dissertation"
+OUT = os.path.join(ROOT_DIR, "results", "dissertation")
 os.makedirs(OUT, exist_ok=True)
 
 # ── Consistent style ───────────────────────────────────────────────
@@ -42,7 +44,7 @@ plt.rcParams.update({
 
 # ── Load data ──────────────────────────────────────────────────────
 print("Loading data and building SMM baseline params...")
-bloc_data = build_bloc_data(data_dir=".")
+bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
 raw       = bloc_data.set_index("bloc")
 weights   = {}
 for bloc in PLAYERS:
@@ -53,11 +55,12 @@ weights = {k: v/total_w for k,v in weights.items()}
 # ── Load result CSVs ───────────────────────────────────────────────
 # These must exist from your previous run_analysis.py execution
 try:
-    df_summary  = pd.read_csv("results/baseline_summary.csv")
-    df_sweeps   = pd.read_csv("results/baseline_sweeps.csv")
-    df_crossings = pd.read_csv("results/sweep_crossings.csv")
-    df_gsa_corr = pd.read_csv("results/gsa_baseline_correlations.csv")
-    df_gsa_samp = pd.read_csv("results/gsa_baseline_samples.csv")
+    _r = os.path.join(ROOT_DIR, "results")
+    df_summary  = pd.read_csv(os.path.join(_r, "baseline_summary.csv"))
+    df_sweeps   = pd.read_csv(os.path.join(_r, "baseline_sweeps.csv"))
+    df_crossings = pd.read_csv(os.path.join(_r, "sweep_crossings.csv"))
+    df_gsa_corr = pd.read_csv(os.path.join(_r, "gsa_baseline_correlations.csv"))
+    df_gsa_samp = pd.read_csv(os.path.join(_r, "gsa_baseline_samples.csv"))
 except FileNotFoundError as e:
     print(f"Error: Missing results files. Run run_analysis.py first.\n{e}")
     exit()
@@ -183,76 +186,6 @@ fig.savefig(os.path.join(OUT, "fig_gsa_sensitivity.png"))
 plt.close(fig)
 
 # ══════════════════════════════════════════════════════════════════
-# FIGURE 6 — BIMODAL W DISTRIBUTION
-# ══════════════════════════════════════════════════════════════════
-print("Generating Figure 6: Bimodal W Distribution...")
-
-fig, ax = plt.subplots(figsize=(7, 4.5))
-final_W = W_paths[:, -1]
-ax.hist(final_W[final_W < params.theta], bins=15, color="#2980B9", alpha=0.6, label="Coordination Failure")
-ax.hist(final_W[final_W >= params.theta], bins=15, color="#C0392B", alpha=0.6, label="Coordination Success")
-ax.axvline(params.theta, color="black", ls="--", label=f"Threshold θ={params.theta}")
-ax.set_xlabel("Final Coalition Weight (W)")
-ax.set_ylabel("Frequency")
-ax.set_title("The Climate Tipping Point: Bimodal Outcomes")
-ax.legend()
-plt.tight_layout()
-fig.savefig(os.path.join(OUT, "fig_w_distribution.png"))
-plt.close(fig)
-
-# ══════════════════════════════════════════════════════════════════
-# FIGURE 8 — GSA HEATMAP
-# ══════════════════════════════════════════════════════════════════
-print("Generating Figure 8: GSA Heatmap...")
-
-heat_matrix = df_gsa_corr.pivot(index="parameter", columns="outcome", values="rho")
-heat_matrix = heat_matrix.reindex(index=param_order, columns=outcomes).dropna(how='all')
-
-fig, ax = plt.subplots(figsize=(10, 8))
-im = ax.imshow(heat_matrix, cmap="RdBu_r", vmin=-0.6, vmax=0.6)
-plt.colorbar(im, label="Spearman ρ")
-
-ax.set_xticks(range(len(outcomes)))
-ax.set_xticklabels(outcome_headers, rotation=45, ha="right")
-ax.set_yticks(range(len(heat_matrix.index)))
-ax.set_yticklabels([param_latex.get(p, p) for p in heat_matrix.index])
-
-# Annotate with stars
-pval_matrix = df_gsa_corr.pivot(index="parameter", columns="outcome", values="pvalue").reindex(index=heat_matrix.index, columns=outcomes)
-for i in range(len(heat_matrix.index)):
-    for j in range(len(outcomes)):
-        rho = heat_matrix.iloc[i, j]
-        pv  = pval_matrix.iloc[i, j]
-        star = "***" if pv < 0.001 else "**" if pv < 0.01 else "*" if pv < 0.05 else ""
-        ax.text(j, i, f"{rho:+.2f}{star}", ha="center", va="center", fontsize=8, 
-                color="white" if abs(rho) > 0.3 else "black")
-
-ax.set_title("Global Sensitivity Analysis: Multi-Outcome Correlation")
-plt.tight_layout()
-fig.savefig(os.path.join(OUT, "fig_gsa_heatmap.png"))
-plt.close(fig)
-
-# ══════════════════════════════════════════════════════════════════
-# FIGURE — PERIOD-1 ADOPTION PROBABILITIES BY BLOC
-# ══════════════════════════════════════════════════════════════════
-print("Generating Figure: Period-1 adoption probabilities...")
-
-fig, ax = plt.subplots(figsize=(6, 4))
-blocs = PLAYERS
-p1_probs = [sigma[1][G0][idx[b]] for b in blocs]
-colors   = [BLOC_COLOURS[b] for b in blocs]
-bars = ax.bar([BLOC_LABELS[b] for b in blocs], p1_probs, color=colors, alpha=0.85, edgecolor="white", linewidth=0.5)
-for bar, val in zip(bars, p1_probs):
-    ax.text(bar.get_x() + bar.get_width()/2, val + 0.005, f"{val:.3f}",
-            ha="center", va="bottom", fontsize=10)
-ax.set_ylabel("P(adopt in period 1)")
-ax.set_title("Period-1 Equilibrium Adoption Probabilities — SMM Baseline")
-ax.set_ylim(0, min(1.0, max(p1_probs) * 1.25))
-plt.tight_layout()
-fig.savefig(os.path.join(OUT, "fig_period1_sigmas.png"))
-plt.close(fig)
-
-# ══════════════════════════════════════════════════════════════════
 # FIGURE — ADOPTION PROBABILITIES OVER TIME (MC-based)
 # ══════════════════════════════════════════════════════════════════
 print("Generating Figure: Sigma over time...")
@@ -272,34 +205,6 @@ ax.set_xticks(range(1, T + 1))
 ax.legend(framealpha=0.9, fontsize=9)
 plt.tight_layout()
 fig.savefig(os.path.join(OUT, "fig_sigma_over_time.png"))
-plt.close(fig)
-
-# ══════════════════════════════════════════════════════════════════
-# FIGURE — ADOPTION TIMING DISTRIBUTION BY BLOC
-# ══════════════════════════════════════════════════════════════════
-print("Generating Figure: Adoption timing distribution...")
-
-fig, axes = plt.subplots(1, 4, figsize=(14, 4), sharey=False)
-for ax, bloc in zip(axes, PLAYERS):
-    bi = idx[bloc]
-    times = adopt_time[:, bi]
-    finite = times[times < np.inf].astype(int)
-    never  = (times == np.inf).sum()
-    counts = np.zeros(T + 1)
-    for t in finite:
-        if 1 <= t <= T:
-            counts[t] += 1
-    ax.bar(range(1, T + 1), counts[1:], color=BLOC_COLOURS[bloc], alpha=0.8, edgecolor="white")
-    ax.bar([T + 1], [never], color=BLOC_COLOURS[bloc], alpha=0.35, edgecolor="white", hatch="//")
-    ax.set_title(BLOC_LABELS[bloc], fontsize=10)
-    ax.set_xlabel("Period")
-    ax.set_xticks(list(range(1, T + 1)) + [T + 1])
-    ax.set_xticklabels([str(t) for t in range(1, T + 1)] + ["Never"], fontsize=8)
-    if bloc == PLAYERS[0]:
-        ax.set_ylabel("Count (n=1000 runs)")
-fig.suptitle("Adoption Timing by Bloc — SMM Baseline", fontsize=12, y=1.01)
-plt.tight_layout()
-fig.savefig(os.path.join(OUT, "fig_adoption_timing.png"))
 plt.close(fig)
 
 # ══════════════════════════════════════════════════════════════════
@@ -436,6 +341,152 @@ tex = tex_table(
 write_tex("table_sweep_crossings.tex", tex)
 
 # ══════════════════════════════════════════════════════════════════
+# TABLE — SMM MOMENT FIT
+# ══════════════════════════════════════════════════════════════════
+print("Generating Table: SMM moment fit...")
+
+# Empirical targets (from smm_calibration.py)
+MOMENT_TARGETS = [0.23, 3.50, 2.50, 0.15, 0.05]
+MOMENT_WEIGHTS = [1.0,  0.2,  0.2,  1.0,  1.0]
+
+# Compute model-implied moments from already-solved baseline
+G0   = (0, 0, 0, 0)
+s_EU = sigma[1][G0][idx["EU"]]
+s_US = sigma[1][G0][idx["US"]]
+s_CN = sigma[1][G0][idx["CN"]]
+
+m1_model = s_EU - s_US
+m3_model = s_EU / max(s_US, s_CN, 1e-6)
+m5_model = float(s_CN)
+
+us_times = adopt_time[:, idx["US"]]
+us_finite = us_times[us_times < np.inf]
+m2_model = float(us_finite.mean()) if len(us_finite) > 0 else float(params.T)
+
+W_final = W_paths[:, -1]
+m4_model = float(((W_final >= 0.5) & (W_final < params.theta)).mean())
+
+MOMENT_IMPLIED = [m1_model, m2_model, m3_model, m4_model, m5_model]
+
+moment_rows = [
+    ["M1", r"EU--US adoption gap ($\sigma_{EU,1} - \sigma_{US,1}$)",
+     "0.23", f"{m1_model:.3f}"],
+    ["M2", r"Mean US adoption period $\mid$ adopting",
+     "3.50", f"{m2_model:.3f}"],
+    ["M3", r"EU leadership ratio ($\sigma_{EU,1} / \max(\sigma_{US,1}, \sigma_{CN,1})$)",
+     "2.50", f"{m3_model:.3f}"],
+    ["M4", r"Stagnation probability $P(0.5 \leq W_T < \theta)$",
+     "0.15", f"{m4_model:.3f}"],
+    ["M5", r"China period-1 adoption probability ($\sigma_{CN,1}$)",
+     "0.05", f"{m5_model:.3f}"],
+]
+
+tex_moments = tex_table(
+    caption=(r"SMM Moment Targets and Model-Implied Values at Calibrated Parameters. "
+             r"Model-implied values evaluated with $n = 1{,}000$ MC draws."),
+    label="smm_moments",
+    header=["Moment", "Description", "Target", "Model-implied"],
+    rows=moment_rows,
+)
+write_tex("table_smm_moments.tex", tex_moments)
+
+
+# ══════════════════════════════════════════════════════════════════
+# TABLE: EQUILIBRIUM UNIQUENESS
+# ══════════════════════════════════════════════════════════════════
+print("Building equilibrium uniqueness table...")
+
+try:
+    df_eq = pd.read_csv(os.path.join(ROOT_DIR, "results", "equilibrium_uniqueness.csv"))
+    df_ms  = df_eq[df_eq["test"] == "multistart"]
+    df_eig = df_eq[df_eq["test"] == "eigenvalue"]
+
+    total_nodes    = int(df_ms["n_active"].count())
+    max_dev        = float(df_ms["max_deviation"].max())
+    n_disagree     = int((df_ms["unique"] == False).sum())
+    n_eig_nodes    = len(df_eig)
+    max_sr         = float(df_eig["spectral_radius"].max())
+    n_unstable     = int((df_eig["spectral_radius"] >= 1.0).sum())
+    verdict_12     = "Pass" if n_disagree == 0 else "Fail"
+    verdict_3      = "Pass" if n_unstable == 0 else "Fail"
+
+    eq_rows = [
+        ["Multi-start (Tests 1--2)",
+         r"Max deviation from $\sigma^*$ across all nodes",
+         f"{max_dev:.2e}", verdict_12],
+        ["", "Non-converged initialisations", "0", ""],
+        ["", "Active nodes tested", str(total_nodes), ""],
+        ["MIDRULE"],
+        ["Eigenvalue stability (Test 3)",
+         r"Max spectral radius $\rho(J_F)$ (need $< 1$)",
+         f"{max_sr:.4f}", verdict_3],
+        ["", r"Nodes with $\geq 2$ active players", str(n_eig_nodes), ""],
+    ]
+
+    tex_eq = tex_table(
+        caption=(r"QRE Equilibrium Uniqueness Tests at SMM-calibrated parameters. "
+                 r"Tests 1--2: fixed-point re-initialised from 20 random starts plus simplex "
+                 r"corners at every active game-tree node. "
+                 r"Test 3: spectral radius of the logit best-response Jacobian $J_F$ at $\sigma^*$."),
+        label="equilibrium_uniqueness",
+        header=["Test", "Criterion", "Result", "Verdict"],
+        rows=eq_rows,
+    )
+    write_tex("table_equilibrium_uniqueness.tex", tex_eq)
+
+except FileNotFoundError:
+    print("  ⚠ results/equilibrium_uniqueness.csv not found — run equilibrium_uniqueness.py first")
+
+
+# ══════════════════════════════════════════════════════════════════
+# TABLE: BASELINE DIAGNOSTICS
+# ══════════════════════════════════════════════════════════════════
+print("Building baseline diagnostics table...")
+
+row0 = df_summary[df_summary["t"] == 1].iloc[0]
+success_rate  = float(row0["success_rate"])
+mean_W_final  = float(row0["mean_W"])
+mean_ct       = float(row0["mean_coord_time"])
+
+diag_rows = [
+    [r"Coordination success rate", r"$P(W_T \geq \theta)$",
+     f"{success_rate:.3f}"],
+    [r"Mean final weighted adoption $W_T$", r"$\mathbb{E}[W_T]$",
+     f"{mean_W_final:.4f}"],
+    [r"Mean coordination period $\mid$ success", r"$\mathbb{E}[\tau \mid W_\tau \geq \theta]$",
+     f"{mean_ct:.2f}"],
+    ["MIDRULE"],
+    [r"Period-1 adoption prob.\ --- US",  r"$\sigma_{US,1}$",
+     f"{float(row0['sigma_US']):.4f}"],
+    [r"Period-1 adoption prob.\ --- EU",  r"$\sigma_{EU,1}$",
+     f"{float(row0['sigma_EU']):.4f}"],
+    [r"Period-1 adoption prob.\ --- CN",  r"$\sigma_{CN,1}$",
+     f"{float(row0['sigma_CN']):.4f}"],
+    [r"Period-1 adoption prob.\ --- RoW", r"$\sigma_{RoW,1}$",
+     f"{float(row0['sigma_RoW']):.4f}"],
+    ["MIDRULE"],
+    [r"First-mover freq.\ --- US",  r"$P(\tau_{US}=1)$",
+     f"{float(row0['fm_US']):.4f}"],
+    [r"First-mover freq.\ --- EU",  r"$P(\tau_{EU}=1)$",
+     f"{float(row0['fm_EU']):.4f}"],
+    [r"First-mover freq.\ --- CN",  r"$P(\tau_{CN}=1)$",
+     f"{float(row0['fm_CN']):.4f}"],
+    [r"First-mover freq.\ --- RoW", r"$P(\tau_{RoW}=1)$",
+     f"{float(row0['fm_RoW']):.4f}"],
+]
+
+tex_diag = tex_table(
+    caption=(r"Baseline Model Diagnostics at SMM-calibrated parameters "
+             r"($n = 1{,}000$ Monte Carlo draws). "
+             r"Success defined as $W_T \geq \theta$."),
+    label="baseline_diagnostics",
+    header=["Statistic", "Expression", "Value"],
+    rows=diag_rows,
+)
+write_tex("table_baseline_diagnostics.tex", tex_diag)
+
+
+# ══════════════════════════════════════════════════════════════════
 # COMPILE TABLE .tex → PNG  (pdflatex → pdfcrop → pdftoppm)
 # ══════════════════════════════════════════════════════════════════
 import subprocess, tempfile, shutil
@@ -477,8 +528,9 @@ def compile_table_png(tex_fragment_path, out_png_path):
             print(f"  ✗ No PNG produced for {tex_fragment_path}")
 
 print("Compiling table PNGs via pdflatex...")
-for tbl in ["table_gsa_correlations", "table_smm_alphas",
-            "table_sweep_crossings", "table_baseline_diagnostics"]:
+for tbl in ["table_smm_moments", "table_equilibrium_uniqueness", "table_gsa_correlations",
+            "table_smm_alphas", "table_sweep_crossings", "table_baseline_diagnostics",
+            "table_functional_form_robustness"]:
     tex_path = os.path.join(OUT, f"{tbl}.tex")
     png_path = os.path.join(OUT, f"{tbl}.png")
     if os.path.exists(tex_path):

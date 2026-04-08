@@ -5,6 +5,11 @@ Three post-SMM sanity checks. Run as:
     python smm_verification.py
 """
 
+import sys
+import os
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+sys.path.insert(0, os.path.join(ROOT_DIR, "core"))
 import warnings
 import numpy as np
 from scipy.optimize import minimize
@@ -23,8 +28,8 @@ from smm_calibration import (
     MOMENTS_DATA, MOMENT_NAMES, MOMENT_WEIGHTS, BOUNDS # Added these imports
 )
 
-# ── Best SMM estimate (A/C/SMM0 convergence region) ───────────────
-THETA_BEST = [1.8958, 0.3381, 0.5146, 1.0796]
+# ── Best SMM estimate — loaded from calibration output ────────────
+THETA_BEST = list(np.load(os.path.join(ROOT_DIR, "results", "smm_best_theta.npy")))
 N_MC       = 1000
 SEEDS      = [42, 123, 999, 2024, 7]
 
@@ -33,7 +38,7 @@ SEP2 = "-" * 52
 
 # ── Setup ──────────────────────────────────────────────────────────
 print("Loading data...", flush=True)
-bloc_data = build_bloc_data(data_dir=".")
+bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
 raw = bloc_data.set_index("bloc")
 
 weights = {}
@@ -162,35 +167,47 @@ print(f"\nDone.")
 # ══════════════════════════════════════════════════════════════════
 # CHECK 4 — PARAMETER ELASTICITY (STABILITY TEST)
 # ══════════════════════════════════════════════════════════════════
-print(f"\n{SEP}\n  CHECK 4 — PARAMETER ELASTICITY (STABILITY)\n{SEP}")
-EPSILON_PERTURB = 0.05 
-print(f"  Perturbing all target moments by +{EPSILON_PERTURB*100}%...", flush=True)
+print(f"\n{SEP}\n  CHECK 4 — PARAMETER ELASTICITY (±10% STABILITY TEST)\n{SEP}")
+EPSILON_PERTURB = 0.05
+print(f"  Perturbing all target moments by ±{EPSILON_PERTURB*100:.0f}%...", flush=True)
 
 def stressed_objective(theta, raw, weights, targets):
     from smm_calibration import BOUNDS, MOMENT_WEIGHTS
     for v, (lo, hi) in zip(theta, BOUNDS):
         if not (lo < v < hi): return 1e6
-    m_model = compute_moments(theta, raw, weights, n_mc=250) 
+    m_model = compute_moments(theta, raw, weights, n_mc=250)
     diff = targets - m_model
     return float(MOMENT_WEIGHTS @ (diff ** 2))
 
-stressed_targets = MOMENTS_DATA * (1 + EPSILON_PERTURB)
-res_perturbed = minimize(stressed_objective, THETA_BEST, 
-                         args=(raw, weights, stressed_targets),
-                         method="Nelder-Mead", options=NM_OPTIONS)
+stressed_pos = MOMENTS_DATA * (1 + EPSILON_PERTURB)
+stressed_neg = MOMENTS_DATA * (1 - EPSILON_PERTURB)
 
-print(f"\n  {'Param':<8} {'Baseline':>10} {'Perturbed':>10} {'Elasticity':>12}")
-print(f"  {'-'*46}")
+print(f"  Running +{EPSILON_PERTURB*100:.0f}% optimisation...", flush=True)
+res_pos = minimize(stressed_objective, THETA_BEST,
+                   args=(raw, weights, stressed_pos),
+                   method="Nelder-Mead", options=NM_OPTIONS)
 
-elasticities = []
-for name, base, pert in zip(PARAM_NAMES, THETA_BEST, res_perturbed.x):
-    p_change = (pert - base) / base
-    elasticity = p_change / EPSILON_PERTURB
-    elasticities.append(abs(elasticity))
-    print(f"  {name:<8} {base:>10.4f} {pert:>10.4f} {elasticity:>12.4f}")
+print(f"  Running -{EPSILON_PERTURB*100:.0f}% optimisation...", flush=True)
+res_neg = minimize(stressed_objective, THETA_BEST,
+                   args=(raw, weights, stressed_neg),
+                   method="Nelder-Mead", options=NM_OPTIONS)
 
-mean_el = np.mean(elasticities)
-print(f"\n  Mean Elasticity : {mean_el:.4f}  (Target < 2.0)")
+pos_label = f"+{EPSILON_PERTURB*100:.0f}%"
+neg_label = f"-{EPSILON_PERTURB*100:.0f}%"
+print(f"\n  {'Param':<8} {'Baseline':>10} {pos_label:>10} {neg_label:>10} {'Mean |Elast|':>14}")
+print(f"  {'-'*58}")
+
+mean_elasticities = []
+for name, base, pos_val, neg_val in zip(PARAM_NAMES, THETA_BEST, res_pos.x, res_neg.x):
+    el_pos = abs((pos_val - base) / base) / EPSILON_PERTURB
+    el_neg = abs((neg_val - base) / base) / EPSILON_PERTURB
+    mean_el = (el_pos + el_neg) / 2
+    mean_elasticities.append(mean_el)
+    print(f"  {name:<8} {base:>10.4f} {pos_val:>10.4f} {neg_val:>10.4f} {mean_el:>14.4f}")
+
+overall_mean = np.mean(mean_elasticities)
+verdict = "PASS" if overall_mean < 2.0 else "FAIL"
+print(f"\n  Mean |Elasticity| : {overall_mean:.4f}  (Target < 2.0) — {verdict}")
 
 # ══════════════════════════════════════════════════════════════════
 # CHECK 5 — JACOBIAN IDENTIFICATION (THE PRO MOVE)

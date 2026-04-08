@@ -24,6 +24,8 @@ Usage
 
 import os
 import sys
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
 import argparse
 import warnings
 import time
@@ -48,7 +50,7 @@ from climate_game import (
 # OUTPUT DIRECTORIES
 # ──────────────────────────────────────────────────────────────────────────────
 
-OUT_DIR = "results"
+OUT_DIR = os.path.join(ROOT_DIR, "results")
 FIG_DIR = os.path.join(OUT_DIR, "figures")
 os.makedirs(FIG_DIR, exist_ok=True)
 
@@ -192,14 +194,19 @@ DISCOUNT   = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.65}
 # Original grid-search defaults (used as pre-SMM baseline reference)
 BASE_ALPHAS = dict(ac=3.0, ad=0.25, ap=1.5, ab=2.0)
 
-# SMM-calibrated baseline (A/C/SMM0 convergence region)
-SMM_BASELINE = dict(
-    ac=1.8958,  # Transition cost scaling
-    ad=0.3381,  # Climate damage scaling
-    ap=0.5146,  # Political pressure scaling
-    ab=1.0796,  # Coordination benefit scaling
-    lam=1.54    # Fixed rationality parameter
-)
+# SMM-calibrated baseline — loaded from saved calibration output
+def _load_smm_baseline():
+    import numpy as np
+    from pathlib import Path
+    _path = Path(__file__).parent.parent / "results" / "smm_best_theta.npy"
+    if not _path.exists():
+        raise FileNotFoundError(
+            "results/smm_best_theta.npy not found — run smm_calibration.py first"
+        )
+    ac, ad, ap, ab = np.load(_path)
+    return dict(ac=float(ac), ad=float(ad), ap=float(ap), ab=float(ab), lam=1.54)
+
+SMM_BASELINE = _load_smm_baseline()
 
 BLOC_COLOURS = {
     "US":  "#E63946",
@@ -663,59 +670,7 @@ def run_gsa(params, raw, weights, n_samples, gsa_mc, seed=42):
                .sort_values("rho", ascending=False))
     print(cn_corr.to_string())
 
-    # ── GSA figure ────────────────────────────────────────────────
-    _plot_gsa(df, df_corr)
-
     return df, df_corr
-
-
-def _plot_gsa(df, df_corr):
-    fig = plt.figure(figsize=(18, 5))
-    gs  = gridspec.GridSpec(1, 3, figure=fig, wspace=0.35)
-
-    # Panel 1: success rate histogram
-    ax1 = fig.add_subplot(gs[0])
-    sr  = df["success_rate"].dropna()
-    ax1.hist(sr, bins=25, color="#2A9D8F", alpha=0.85, edgecolor="white", lw=0.5)
-    ax1.axvline(0.7, color="#E63946", ls="--", lw=1.5, label="70%")
-    ax1.axvline(sr.mean(), color="#457B9D", ls="-", lw=1.5,
-                label=f"mean={sr.mean():.2f}")
-    ax1.set_xlabel("Coordination success rate")
-    ax1.set_ylabel("Count")
-    ax1.set_title("Success rate distribution")
-    ax1.legend(fontsize=8)
-
-    # Panel 2: coordination timing (successes only)
-    ax2 = fig.add_subplot(gs[1])
-    timed = df["mean_coord_time"].dropna()
-    if len(timed) > 0:
-        ax2.hist(timed, bins=20, color="#457B9D", alpha=0.85,
-                 edgecolor="white", lw=0.5)
-        ax2.set_xlabel("Mean coordination period")
-        ax2.set_ylabel("Count")
-        ax2.set_title("Coordination timing (successful runs)")
-    else:
-        ax2.text(0.5, 0.5, "No successful\ncoordination", ha="center", va="center",
-                 transform=ax2.transAxes, fontsize=11, color="gray")
-        ax2.set_title("Coordination timing")
-
-    # Panel 3: Spearman ρ heatmap for success_rate
-    ax3 = fig.add_subplot(gs[2])
-    sr_corr = (df_corr[df_corr["outcome"] == "success_rate"]
-               .set_index("parameter")["rho"]
-               .sort_values(ascending=False))
-    colours = ["#E63946" if v > 0 else "#2A9D8F" for v in sr_corr.values]
-    bars = ax3.barh(sr_corr.index, sr_corr.values, color=colours, alpha=0.85)
-    ax3.axvline(0, color="black", lw=0.8)
-    ax3.set_xlabel("Spearman ρ")
-    ax3.set_title("Param sensitivity\n(success rate)")
-    ax3.tick_params(axis="y", labelsize=8)
-
-    fig.suptitle("GSA — SMM Baseline", fontsize=12, fontweight="bold")
-    path = os.path.join(FIG_DIR, "gsa_baseline.png")
-    fig.savefig(path, dpi=130, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  Figure: {path}")
 
 
 
@@ -740,7 +695,7 @@ def main():
         print("  [--fast mode: reduced MC draws for quick testing]")
 
     # ── Load data ─────────────────────────────────────────────────
-    bloc_data = build_bloc_data(data_dir=".")
+    bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
     raw = bloc_data.set_index("bloc")
 
     weights = {}

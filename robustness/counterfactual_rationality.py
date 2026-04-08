@@ -27,6 +27,11 @@ Outputs:
   results/figures/fig_counterfactual_rationality.png
 """
 
+import sys
+import os
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT_DIR)
+sys.path.insert(0, os.path.join(ROOT_DIR, "core"))
 import warnings
 import numpy as np
 import pandas as pd
@@ -51,13 +56,13 @@ LAM_HI   = 3.0
 LAM_FIXED = SMM_BASELINE["lam"]   # λ for EU, RoW held constant
 SEED     = 99
 
-OUT_CSV  = "results/counterfactual_rationality.csv"
-CORR_CSV = "results/counterfactual_correlations.csv"
-FIG_PATH = "results/figures/fig_counterfactual_rationality.png"
+OUT_CSV  = os.path.join(ROOT_DIR, "results", "counterfactual_rationality.csv")
+CORR_CSV = os.path.join(ROOT_DIR, "results", "counterfactual_correlations.csv")
+FIG_PATH = os.path.join(ROOT_DIR, "results", "figures", "fig_counterfactual_rationality.png")
 
 # ── Load data and build baseline params ───────────────────────────────────────
 print("Loading data...")
-bloc_data = build_bloc_data(data_dir=".")
+bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
 raw       = bloc_data.set_index("bloc")
 
 weights = {}
