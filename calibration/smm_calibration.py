@@ -8,8 +8,17 @@ MOMENTS (all analytical — σ at t=1, state G0):
   M2: US period-1 adoption probability        (Target: 0.10)
   M3: EU lead ratio (EU/US)                   (Target: 2.5)
   M4: CN period-1 adoption probability        (Target: 0.05)
-  M5: P(zero adoption by period 2)            (Target: 0.15)
-  M6: P(at least 2 blocs adopted by period 3) (Target: 0.60)
+  M5: P(zero adoption by period 2)            (Target: 0.30)
+  M6: Mean coordination timing | success      (Target: 5.0)
+  M7: Late/early adoption acceleration ratio  (Target: 1.5)
+      Δ_early = mean_σ(t=2) - mean_σ(t=1) over active players
+      Δ_late  = mean_σ(t=4) - mean_σ(t=3) over active players
+      Ratio = Δ_late / Δ_early
+      Identifies α_p: pressure grows with W_t so late-period acceleration
+      exceeds early-period acceleration when pressure matters. Cost learning
+      (γ) also grows with W_t but only at adoption, not as ongoing pressure;
+      taking the ratio partially cancels level effects and isolates the
+      dynamic urgency that pressure drives.
 """
 
 import sys
@@ -25,14 +34,14 @@ from scipy.optimize import minimize
 
 warnings.filterwarnings("ignore")
 
-from climate_game import GameParams, PLAYERS, solve_model, monte_carlo
+from climate_game import GameParams, PLAYERS, solve_model, monte_carlo, compute_W
 from run_analysis import build_bloc_data, build_params, DISCOUNT, ETA, KAPPA
 
 # ── Fixed parameters ──────────────────────────────────────────────────────
 LAMBDA_FIXED   = 1.54
 ETA_FIXED      = ETA     # 15.0
 KAPPA_FIXED    = KAPPA   # 0.05
-DISCOUNT_FIXED = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.65}
+DISCOUNT_FIXED = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.70}
 
 # ── Real-world target moments ──────────────────────────────────────────────
 MOMENTS_DATA = np.array([
@@ -40,8 +49,9 @@ MOMENTS_DATA = np.array([
     0.10,   # M2: US period-1 adoption probability
     2.50,   # M3: EU lead ratio (EU/US)
     0.05,   # M4: CN period-1 adoption probability
-    0.15,   # M5: P(zero adoption by period 2)
-    0.60,   # M6: P(at least 2 blocs adopted by period 3)
+    0.30,   # M5: P(zero adoption by period 2)
+    5.00,   # M6: Mean coordination timing | success (periods)
+    1.00,   # M7: Late/early adoption acceleration ratio Δ_late/Δ_early
 ])
 
 MOMENT_NAMES = [
@@ -50,17 +60,19 @@ MOMENT_NAMES = [
     "EU lead ratio (EU/US)",
     "CN period-1 adoption prob",
     "P(zero adoption by t=2)",
-    "P(≥2 blocs by t=3)",
+    "Mean coord timing | success",
+    "Accel ratio Δ_late/Δ_early",
 ]
 
-MOMENT_WEIGHTS = np.array([1.0, 1.0, 0.0016, 1.0, 1.0, 1.0])  # M3 scaled: (0.1/2.5)^2
+# M3 scaled: (0.1/2.5)^2; M6 scaled: (0.2/5.0)^2; M7 soft weight (exploratory)
+MOMENT_WEIGHTS = np.array([1.0, 1.0, 0.0016, 1.0, 1.0, 0.04, 0.5])
 
 # ── Parameter bounds for [α_c, α_d, α_p, α_b] ────────────────────────────
 BOUNDS = [
-    (0.5,  6.0),   # α_c  transition cost scaling
-    (0.05, 1.0),   # α_d  climate damage scaling
-    (0.1,  5.0),   # α_p  political pressure scaling
-    (0.5,  6.0),   # α_b  coordination benefit scaling
+    (0.1, 10.0),   # α_c  transition cost scaling
+    (0.1, 10.0),   # α_d  climate damage scaling
+    (0.1, 10.0),   # α_p  political pressure scaling
+    (0.1, 10.0),   # α_b  coordination benefit scaling
 ]
 PARAM_NAMES = ["α_c", "α_d", "α_p", "α_b"]
 
@@ -91,7 +103,7 @@ def compute_moments(theta, raw, weights, n_mc=N_MC_OPT, seed=MC_SEED):
     try:
         V, sigma, _, _ = solve_model(params)
     except Exception:
-        return np.array([1e6, 1e6, 1e6, 1e6, 1e6, 1e6])
+        return np.array([1e6] * 7)
 
     G0  = (0, 0, 0, 0)
     idx = {p: i for i, p in enumerate(PLAYERS)}
@@ -112,11 +124,61 @@ def compute_moments(theta, raw, weights, n_mc=N_MC_OPT, seed=MC_SEED):
     m3 = float(s_EU / s_US) if s_US > 1e-9 else 1e6
     m4 = float(s_CN)
 
-    # M6: P(at least 2 blocs adopted by end of period 3) — forward DP
+    # M7: adoption acceleration ratio — forward DP over t=1..4 (no absorption)
+    dist_m7 = {G0: 1.0}
+    mean_sigma = {}
+    for t in range(1, 5):
+        ms = 0.0
+        wt = 0.0
+        for G, gprob in dist_m7.items():
+            active = [i for i in range(n) if G[i] == 0]
+            if not active:
+                continue
+            avg_s = sum(float(sigma[t][G][i]) for i in active) / len(active)
+            ms += avg_s * gprob
+            wt += gprob
+        mean_sigma[t] = ms / wt if wt > 1e-9 else 0.0
+        if t < 4:
+            new_dist = {}
+            for G, gprob in dist_m7.items():
+                active = [i for i in range(n) if G[i] == 0]
+                if not active:
+                    new_dist[G] = new_dist.get(G, 0.0) + gprob
+                    continue
+                for actions in iproduct([0, 1], repeat=len(active)):
+                    p_action = 1.0
+                    G_next = list(G)
+                    for k, i in enumerate(active):
+                        s = float(sigma[t][G][i])
+                        if actions[k] == 1:
+                            p_action *= s
+                            G_next[i] = 1
+                        else:
+                            p_action *= (1 - s)
+                    G_next = tuple(G_next)
+                    new_dist[G_next] = new_dist.get(G_next, 0.0) + gprob * p_action
+            dist_m7 = new_dist
+
+    delta_early = mean_sigma[2] - mean_sigma[1]
+    delta_late  = mean_sigma[4] - mean_sigma[3]
+    if abs(delta_early) < 1e-6:
+        m7 = 1e6
+    else:
+        m7 = delta_late / delta_early
+
+    # M6: first-passage timing — forward DP with absorption at theta
     dist = {G0: 1.0}
-    for t in range(1, 4):
+    success_prob = 0.0
+    timing_sum   = 0.0
+    T_horizon = params.T
+    for t in range(1, T_horizon + 1):
         new_dist = {}
         for G, gprob in dist.items():
+            W = compute_W(G, params)
+            if W >= params.theta:
+                success_prob += gprob
+                timing_sum   += t * gprob
+                continue
             active = [i for i in range(n) if G[i] == 0]
             if not active:
                 new_dist[G] = new_dist.get(G, 0.0) + gprob
@@ -134,9 +196,13 @@ def compute_moments(theta, raw, weights, n_mc=N_MC_OPT, seed=MC_SEED):
                 G_next = tuple(G_next)
                 new_dist[G_next] = new_dist.get(G_next, 0.0) + gprob * p_action
         dist = new_dist
-    m6 = sum(prob for G, prob in dist.items() if sum(G) >= 2)
+    for G, prob in dist.items():
+        if compute_W(G, params) >= params.theta:
+            success_prob += prob
+            timing_sum   += T_horizon * prob
+    m6 = timing_sum / success_prob if success_prob > 1e-9 else 1e6
 
-    return np.array([m1, m2, m3, m4, float(m5), float(m6)])
+    return np.array([m1, m2, m3, m4, float(m5), float(m6), float(m7)])
 
 
 def smm_objective(theta, raw, weights, moments_data=MOMENTS_DATA):
@@ -183,8 +249,8 @@ if __name__ == "__main__":
 
     weights_dict = {}
     for bloc in PLAYERS:
-        weights_dict[bloc] = (0.5 * raw.loc[bloc, "emission_share"]
-                             + 0.5 * raw.loc[bloc, "gdp_share"])
+        weights_dict[bloc] = (0.3 * raw.loc[bloc, "emission_share"]
+                             + 0.7 * raw.loc[bloc, "gdp_share"])
     total_w = sum(weights_dict.values())
     weights_norm = {k: v / total_w for k, v in weights_dict.items()}
 

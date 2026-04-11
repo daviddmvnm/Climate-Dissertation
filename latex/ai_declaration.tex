@@ -1,0 +1,97 @@
+% ============================================================
+%  AI Tools Usage Declaration
+%  Compile: pdflatex ai_declaration.tex
+% ============================================================
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+
+\setstretch{1.15}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+\begin{document}
+
+% ── Header ───────────────────────────────────────────────────
+\begin{center}
+{\large\textbf{AI Tools Usage Declaration}}\\[0.3em]
+{\small The Climate Standoff: A Dynamic Game Model of Strategic Tipping
+in Global Climate Coordination}\\[0.2em]
+{\small David Clements \quad|\quad Academic Year 2026}
+\end{center}
+
+\smallskip
+\hrule
+\smallskip
+
+% ── Narrative ────────────────────────────────────────────────
+AI tools were used throughout this dissertation as part of an iterative research
+support workflow. Their primary role was to assist with debugging computational
+implementation, stress-testing methodological choices, and accelerating
+familiarisation with new technical tools and modelling concepts. All model design
+decisions, calibration choices, and interpretation of results remained my own, and
+code suggestions were reviewed, adapted, and integrated only where they aligned with
+the intended equilibrium structure and economic logic of the project.
+
+AI was also used editorially to improve clarity and presentation, particularly by
+identifying areas of unnecessary repetition, excessive verbosity, or places where
+further explanation would strengthen the argument. In later drafting stages, it was
+used to simulate critical examiner-style feedback, helping expose weak justifications,
+unclear assumptions, and potential methodological vulnerabilities prior to submission.
+
+\textbf{AI tools used:} Claude Opus, Claude Sonnet, GPT-4, GPT-4o, Perplexity.
+
+\smallskip
+
+% ── Table ────────────────────────────────────────────────────
+\begin{table}[h]
+\small
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{>{\bfseries}p{3.6cm} p{12.2cm}}
+\toprule
+Usage & Representative Prompts \\
+\midrule
+
+Literature discovery
+  & ``I'm working on a dynamic game model of climate coordination with heterogeneous blocs and QRE.
+    What are some must-read papers I might have missed?'' /
+    ``Find recent applications of SMM in environmental economics'' /
+    ``What papers cite Barrett (1994) and Harstad (2016) together?'' \\[4pt]
+
+Learning \& teaching
+  & ``Teach me quantal response equilibrium'' /
+    ``Explain the difference between Nash and QRE in plain English'' /
+    ``What is spectral radius and why does it matter for equilibrium uniqueness?'' /
+    ``Have I correctly understood and cited this paper?'' \\[4pt]
+
+Writing feedback
+  & ``Does this read okay or is it too verbose?'' /
+    ``Mark this dissertation and tell me what the worst flaws are'' /
+    ``Where did I not go into enough detail?'' /
+    ``Suggest a clearer way to phrase this policy implication'' \\[4pt]
+
+Code generation \& correction
+  & ``Write a function that computes the spectral radius of the logit response Jacobian'' /
+    ``Check this fixed-point iteration for off-by-one errors'' /
+    ``Rewrite this loop to be vectorised and faster'' \\[4pt]
+
+Methodology review \& debugging
+  & ``Do you see any glaring methodological flaws here?'' /
+    ``Is my identification strategy for the SMM valid?'' /
+    ``Why is the fixed-point iteration not converging at states with 4 active players?'' \\[4pt]
+
+Proofreading \& grammar
+  & ``Proofread this paragraph'' /
+    ``Fix the referencing format here'' \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}

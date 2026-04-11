@@ -1,18 +1,29 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption{SMM Alpha Parameter Estimates vs.\ Scenario Starting Points}
+\caption{Estimated and Fixed Parameter Vector}
 \label{tab:smm_alphas}
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{llrc}
 \toprule
-\textbf{Param.} & \textbf{Description} & \textbf{Scen. A} & \textbf{Scen. B} & \textbf{Scen. C} & \textbf{Default} & \textbf{SMM Est.} \\
+\textbf{Symbol} & \textbf{Description} & \textbf{Value} & \textbf{Status} \\
 \midrule
-$\alpha_c$ & Transition cost scaling & 3.50 & 2.00 & 2.00 & 3.00 & \textbf{1.9018} \\
-$\alpha_d$ & Climate damage scaling & 0.30 & 0.15 & 0.30 & 0.25 & \textbf{0.3310} \\
-$\alpha_p$ & Political pressure scaling & 0.50 & 2.50 & 0.50 & 1.50 & \textbf{0.4742} \\
-$\alpha_b$ & Coordination benefit scaling & 3.00 & 1.00 & 1.00 & 2.00 & \textbf{1.0845} \\
+\multicolumn{4}{l}{\textit{SMM-estimated (Nelder-Mead, best of 4 starts)}} \\[2pt]
+$\alpha_c$ & Transition cost scaling         & 3.3384 & Estimated \\
+$\alpha_d$ & Climate damage scaling          & 0.8699 & Estimated \\
+$\alpha_p$ & Political pressure scaling      & 0.1000 & Estimated \\
+$\alpha_b$ & Coordination benefit scaling    & 1.1853 & Estimated \\[6pt]
+\multicolumn{4}{l}{\textit{Fixed structural}} \\[2pt]
+$\lambda$  & QRE rationality (homogeneous)   & 1.54   & Fixed \\
+$\delta_{US}$  & US discount factor          & 0.75   & Fixed \\
+$\delta_{EU}$  & EU discount factor          & 0.85   & Fixed \\
+$\delta_{CN}$  & China discount factor       & 0.80   & Fixed \\
+$\delta_{RoW}$ & Rest-of-World discount factor & 0.70 & Fixed \\
+$\eta$     & Sigmoid sharpness               & 15.0   & Fixed \\
+$\theta$   & Coalition threshold             & 0.80   & Fixed \\
+$\gamma$   & Learning spillover rate         & 0.25   & Fixed \\
+$\kappa$   & Damage accumulation speed       & 0.05   & Fixed \\
 \bottomrule
-\multicolumn{7}{p{14cm}}{\footnotesize \textit{Note:} SMM estimates from Nelder-Mead optimisation, best of 4 starting points. Fixed parameters: $\lambda=1.54$, $\eta=15.0$, $\kappa=0.05$, $\delta_{EU}=0.85$, $\delta_{US}=0.75$, $\delta_{CN}=0.80$, $\delta_{RoW}=0.65$.}
+\multicolumn{4}{p{10cm}}{\footnotesize \textit{Note:} SMM minimises weighted squared distance between model-implied and empirical moments M1--M5. $\lambda$ is held fixed throughout estimation; it is not recovered by SMM. All fixed parameters are held constant across estimation and the full sensitivity analysis.}
 \\
 \end{tabular}
 \end{table}

@@ -58,27 +58,29 @@ os.makedirs(FIG_DIR, exist_ok=True)
 # DATA LOADING + BLOC AGGREGATION  (mirrors calibrated_model_v5.ipynb Cells 2–3)
 # ──────────────────────────────────────────────────────────────────────────────
 
-EU27_CODES = [
+EU27_CODES = {
     "FRA","DEU","ITA","ESP","NLD","POL","BEL","IRL","AUT","SWE",
     "DNK","FIN","PRT","CZE","ROU","GRC",
-]
+}
 
-LOW_INCOME = [
-    "AFG","BFA","BDI","CAF","TCD","COD","ERI","ETH","GMB","GIN",
-    "GNB","PRK","LBR","MDG","MWI","MLI","MOZ","NER","RWA","SLE",
-    "SOM","SSD","SDN","SYR","TGO","UGA","YEM",
-]
-
-LOWER_MIDDLE_INCOME = [
-    "AGO","DZA","BGD","BEN","BTN","BOL","CPV","KHM","CMR","COM",
-    "COG","CIV","DJI","EGY","SLV","SWZ","GHA","HTI","HND",
-    "IDN","IRN","KEN","KIR","KGZ","LAO","LSO","MRT","FSM","MNG",
-    "MAR","MMR","NPL","NIC","NGA","PAK","PNG","PHL","STP","SEN",
-    "SLB","LKA","TZA","TJK","TLS","TUN","UKR","UZB","VUT","VNM",
-    "ZMB","ZWE",
-]
-
-ROW_CODES = set(LOW_INCOME + LOWER_MIDDLE_INCOME)
+# Strategically meaningful RoW: major developing economies with genuine
+# adoption tradeoffs. Excludes LDCs (structurally non-viable) and Gulf
+# states (inverted incentives as fossil fuel exporters).
+ROW_CODES = {
+    # Core non-negotiable
+    "IND",  # India — 3rd largest emitter, climate vs development tension
+    "IDN",  # Indonesia — top-10 emitter, coal dependency
+    "BRA",  # Brazil — land-use emissions, renewable capacity, swing player
+    "ZAF",  # South Africa — African anchor, coal dependent
+    "MEX",  # Mexico — significant emitter, US adjacency pressure
+    # Strong additions
+    "VNM",  # Vietnam — industrial economy, fast-growing emissions
+    "THA",  # Thailand — ASEAN industrial, real emissions trajectory
+    "MYS",  # Malaysia — ASEAN industrial, genuine tradeoffs
+    "COL",  # Colombia — Latin American middle income
+    "ARG",  # Argentina — Latin American middle income
+    "NGA",  # Nigeria — largest African economy, oil dependent, climate vulnerable
+}
 
 
 def assign_bloc(code):
@@ -189,7 +191,7 @@ ETA        = 15
 LAMBDA     = 1.5
 GAMMA      = 0.25
 KAPPA      = 0.05
-DISCOUNT   = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.65}
+DISCOUNT   = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.70}
 
 # Original grid-search defaults (used as pre-SMM baseline reference)
 BASE_ALPHAS = dict(ac=3.0, ad=0.25, ap=1.5, ab=2.0)
@@ -200,9 +202,8 @@ def _load_smm_baseline():
     from pathlib import Path
     _path = Path(__file__).parent.parent / "results" / "smm_best_theta.npy"
     if not _path.exists():
-        raise FileNotFoundError(
-            "results/smm_best_theta.npy not found — run smm_calibration.py first"
-        )
+        # Return BASE_ALPHAS as fallback so smm_calibration.py can import this module
+        return dict(**BASE_ALPHAS, lam=1.54)
     ac, ad, ap, ab = np.load(_path)
     return dict(ac=float(ac), ad=float(ad), ap=float(ap), ab=float(ab), lam=1.54)
 
@@ -253,7 +254,7 @@ def build_params(raw, weights, ac, ad, ap, ab, eps=EPSILON,
         p[bloc] = ap * (raw.loc[bloc, "trade_pct"] / 100.0)
 
     return GameParams(
-        T=10, 
+        T=10,
         theta=theta, 
         lam=lambda_map, # Now passes the dict {bloc: lambda}
         b=ab,
@@ -546,25 +547,25 @@ GSA_RANGES = {
     "delta_EU":       (0.75, 0.90),
     "delta_CN":       (0.68, 0.88),
     "delta_RoW":      (0.55, 0.78),
-    
+
     # Per-bloc cost multipliers (Economic Capacity)
     "cost_US":        (0.4,  1.6),
     "cost_EU":        (0.4,  1.6),
     "cost_CN":        (0.4,  1.6),
     "cost_RoW":       (0.4,  1.6),
-    
+
     # Per-bloc pressure multipliers (Political Salience)
     "pressure_US":    (0.25, 3.0),
     "pressure_EU":    (0.25, 3.0),
     "pressure_CN":    (0.25, 3.0),
     "pressure_RoW":   (0.25, 3.0),
-    
+
     # Individual Rationality (The "Noise vs Strategy" Sweep)
     "lam_US":         (0.1,  5.0),
     "lam_EU":         (0.1,  5.0),
     "lam_CN":         (0.1,  5.0),
     "lam_RoW":        (0.1,  5.0),
-    
+
     # Global Structural parameters
     "theta":          (0.60, 0.92),
     "gamma":          (0.10, 0.45),
@@ -594,7 +595,7 @@ def run_gsa(params, raw, weights, n_samples, gsa_mc, seed=42):
             "CN":  draw["delta_CN"],
             "RoW": draw["delta_RoW"],
         }
-        
+
         # New: Map individual rationality draws for each player
         lam_map_gsa = {
             "US":  draw["lam_US"],
@@ -700,8 +701,8 @@ def main():
 
     weights = {}
     for bloc in PLAYERS:
-        weights[bloc] = (0.5 * raw.loc[bloc, "emission_share"]
-                       + 0.5 * raw.loc[bloc, "gdp_share"])
+        weights[bloc] = (0.3 * raw.loc[bloc, "emission_share"]
+                       + 0.7 * raw.loc[bloc, "gdp_share"])
     total_w = sum(weights.values())
     weights = {k: v / total_w for k, v in weights.items()}
     print(f"  Weights: { {k: round(v,4) for k,v in weights.items()} }")

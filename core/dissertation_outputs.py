@@ -258,21 +258,37 @@ plt.close(fig)
 print("Generating Table: SMM alpha estimates...")
 
 b = SMM_BASELINE
-alpha_rows = [
-    [r"$\alpha_c$", "Transition cost scaling",    "3.50", "2.00", "2.00", "3.00", f"\\textbf{{{b['ac']:.4f}}}"],
-    [r"$\alpha_d$", "Climate damage scaling",      "0.30", "0.15", "0.30", "0.25", f"\\textbf{{{b['ad']:.4f}}}"],
-    [r"$\alpha_p$", "Political pressure scaling",  "0.50", "2.50", "0.50", "1.50", f"\\textbf{{{b['ap']:.4f}}}"],
-    [r"$\alpha_b$", "Coordination benefit scaling","3.00", "1.00", "1.00", "2.00", f"\\textbf{{{b['ab']:.4f}}}"],
-]
-tex = tex_table(
-    caption=r"SMM Alpha Parameter Estimates vs.\ Scenario Starting Points",
-    label="smm_alphas",
-    header=["Param.", "Description", "Scen. A", "Scen. B", "Scen. C", "Default", "SMM Est."],
-    rows=alpha_rows,
-    note=(r"SMM estimates from Nelder-Mead optimisation, best of 4 starting points. "
-          r"Fixed parameters: $\lambda=1.54$, $\eta=15.0$, $\kappa=0.05$, "
-          r"$\delta_{EU}=0.85$, $\delta_{US}=0.75$, $\delta_{CN}=0.80$, $\delta_{RoW}=0.65$."),
-)
+tex = r"""\begin{table}[htbp]
+\centering
+\small
+\caption{Estimated and Fixed Parameter Vector}
+\label{tab:smm_alphas}
+\begin{tabular}{llrc}
+\toprule
+\textbf{Symbol} & \textbf{Description} & \textbf{Value} & \textbf{Status} \\
+\midrule
+\multicolumn{4}{l}{\textit{SMM-estimated (Nelder-Mead, best of 4 starts)}} \\[2pt]
+""" + (
+    rf"$\alpha_c$ & Transition cost scaling         & {b['ac']:.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_d$ & Climate damage scaling          & {b['ad']:.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_p$ & Political pressure scaling      & {b['ap']:.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_b$ & Coordination benefit scaling    & {b['ab']:.4f} & Estimated \\[6pt]"  + "\n"
+) + r"""\multicolumn{4}{l}{\textit{Fixed structural}} \\[2pt]
+$\lambda$  & QRE rationality (homogeneous)   & 1.54   & Fixed \\
+$\delta_{US}$  & US discount factor          & 0.75   & Fixed \\
+$\delta_{EU}$  & EU discount factor          & 0.85   & Fixed \\
+$\delta_{CN}$  & China discount factor       & 0.80   & Fixed \\
+$\delta_{RoW}$ & Rest-of-World discount factor & 0.70 & Fixed \\
+$\eta$     & Sigmoid sharpness               & 15.0   & Fixed \\
+$\theta$   & Coalition threshold             & 0.80   & Fixed \\
+$\gamma$   & Learning spillover rate         & 0.25   & Fixed \\
+$\kappa$   & Damage accumulation speed       & 0.05   & Fixed \\
+\bottomrule
+\multicolumn{4}{p{10cm}}{\footnotesize \textit{Note:} SMM minimises weighted squared distance between model-implied and empirical moments M1--M5. $\lambda$ is held fixed throughout estimation; it is not recovered by SMM. All fixed parameters are held constant across estimation and the full sensitivity analysis.}
+\\
+\end{tabular}
+\end{table}
+"""
 write_tex("table_smm_alphas.tex", tex)
 
 # ══════════════════════════════════════════════════════════════════

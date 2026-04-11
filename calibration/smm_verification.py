@@ -43,8 +43,8 @@ raw = bloc_data.set_index("bloc")
 
 weights = {}
 for bloc in PLAYERS:
-    weights[bloc] = 0.5 * raw.loc[bloc, "emission_share"] \
-                  + 0.5 * raw.loc[bloc, "gdp_share"]
+    weights[bloc] = 0.3 * raw.loc[bloc, "emission_share"] \
+                  + 0.7 * raw.loc[bloc, "gdp_share"]
 total_w = sum(weights.values())
 weights = {k: v / total_w for k, v in weights.items()}
 
@@ -135,7 +135,7 @@ checks = [
     ),
     (
         "Pressure (domestic salience)",
-        "EU > RoW > CN > US",   # EU strong green politics; RoW high exposure
+        "EU > RoW > CN > US",
         ["EU", "RoW", "CN", "US"],
         {p: params.pressure[p] for p in PLAYERS},
     ),

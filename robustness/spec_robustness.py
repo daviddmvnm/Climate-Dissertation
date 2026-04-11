@@ -80,6 +80,9 @@ weights = {k: v/total_w for k, v in weights.items()}
 b      = SMM_BASELINE
 _base_params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
                              ap=b["ap"], ab=b["ab"], lam=b["lam"])
+# Equalised params: α_p = α_c so pressure and cost are on the same cardinal scale
+_eq_params   = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
+                             ap=b["ac"], ab=b["ab"], lam=b["lam"])
 
 
 # ── Shared GSA runner ──────────────────────────────────────────────────────────
@@ -443,11 +446,14 @@ gsa_bar_figure(
 #
 #  What changes: climate_game.political_pressure
 #  Affects: delay payoff only — r_i^D = −p_i·f(W_t) + r_i(t,W_t)
-#  Tests whether the bandwagon dynamic changes character under different specs.
+#  Tests (a) whether the bandwagon dynamic changes character under different
+#  functional forms AND (b) whether findings are a cardinal scaling artefact
+#  by also running with equalised α_p = α_c.
 # ──────────────────────────────────────────────────────────────────────────────
 
 print(f"\n{SEP}")
 print("  SECTION C — POLITICAL PRESSURE SPECIFICATION  [political_pressure]")
+print(f"  Baseline α_p={b['ap']:.4f}   Equalised α_p=α_c={b['ac']:.4f}")
 print(f"{SEP}")
 
 THETA_P = 0.40   # Visibility threshold for sigmoid pressure
@@ -467,44 +473,80 @@ PRESSURE_LABELS = {
 
 PRESSURE_FOCUS = ["pressure_US", "pressure_EU", "pressure_CN", "pressure_RoW"]
 
+# pressure_rhos[spec]["baseline"] and ["equalised"] → dict param → (rho, pval)
 pressure_rhos = {}
+
 for spec_name, pressure_fn in PRESSURE_SPECS.items():
-    print(f"\n  [{spec_name}] GSA ({GSA_SAMPLES} samples)...", flush=True)
-    orig = climate_game.political_pressure
-    climate_game.political_pressure = pressure_fn
-    try:
-        params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                              ap=b["ap"], ab=b["ab"], lam=b["lam"])
-        df_gsa = run_gsa(params)
-        pressure_rhos[spec_name] = spearman_rhos(df_gsa)
-    finally:
-        climate_game.political_pressure = orig
+    pressure_rhos[spec_name] = {}
+    for cond_name, cond_params in [("baseline", _base_params), ("equalised", _eq_params)]:
+        print(f"\n  [{spec_name} / {cond_name}] GSA ({GSA_SAMPLES} samples)...", flush=True)
+        orig = climate_game.political_pressure
+        climate_game.political_pressure = pressure_fn
+        try:
+            df_gsa = run_gsa(cond_params)
+            pressure_rhos[spec_name][cond_name] = spearman_rhos(df_gsa)
+        finally:
+            climate_game.political_pressure = orig
 
-# Focus param comparison (console)
+# Console comparison: for each spec, show baseline vs equalised for focus params
 print(f"\n  PRESSURE FOCUS PARAM CORRELATIONS  (* = p<0.05)")
-print(f"  {'Parameter':<16}", end="")
-for spec in PRESSURE_SPECS:
-    print(f"  {spec:>14}", end="")
-print()
-print(f"  {'-'*60}")
-for param in PRESSURE_FOCUS:
-    print(f"  {param:<16}", end="")
-    for spec in PRESSURE_SPECS:
-        rho, pval = pressure_rhos[spec][param]
-        sig = "*" if pval < 0.05 else " "
-        print(f"  {rho:>+12.4f}{sig}", end="")
-    print()
+print(f"  Key: (B)=baseline α_p={b['ap']:.2f}   (E)=equalised α_p=α_c={b['ac']:.2f}")
+for spec_name in PRESSURE_SPECS:
+    print(f"\n  [{spec_name}]")
+    print(f"  {'Parameter':<18} {'Base ρ':>8}   {'Equal ρ':>8}   {'Δρ':>7}")
+    print(f"  {'-'*50}")
+    for param in PRESSURE_FOCUS:
+        b_rho, b_pval = pressure_rhos[spec_name]["baseline"][param]
+        e_rho, e_pval = pressure_rhos[spec_name]["equalised"][param]
+        bs = "*" if b_pval < 0.05 else " "
+        es = "*" if e_pval < 0.05 else " "
+        print(f"  {param:<18} {b_rho:>+8.4f}{bs}  {e_rho:>+8.4f}{es}  {e_rho-b_rho:>+7.4f}")
 
-# Figure C — GSA bars with formula in panel title
-gsa_bar_figure(
-    all_rhos     = pressure_rhos,
-    spec_labels  = PRESSURE_LABELS,
-    highlight_params = PRESSURE_FOCUS,
-    suptitle = (f"Section C: Political Pressure — GSA Correlations  "
-                f"(n={GSA_SAMPLES} samples, bold = pressure params, faded = p≥0.05)"
-                f"\n[Sigmoid spec: θ_p={THETA_P}, η_p={ETA_P}]"),
-    out_path = os.path.join(ROOT_DIR, "results", "figures", "fig_pressure_spec_test.png"),
+# Figure C — 2-row × 3-col: top row = baseline, bottom row = equalised
+fig, axes = plt.subplots(2, 3, figsize=(16, 10), sharey=True, sharex=False)
+all_params = list(GSA_RANGES.keys())
+
+for col, (spec_name, _) in enumerate(PRESSURE_SPECS.items()):
+    for row, cond_name in enumerate(["baseline", "equalised"]):
+        ax = axes[row, col]
+        rho_vals  = [pressure_rhos[spec_name][cond_name][p][0] for p in all_params]
+        pval_vals = [pressure_rhos[spec_name][cond_name][p][1] for p in all_params]
+        bar_cols  = ["#E63946" if r > 0 else "#457B9D" for r in rho_vals]
+        bars = ax.barh(all_params, rho_vals, color=bar_cols,
+                       alpha=0.8, edgecolor="white", linewidth=0.5)
+        for bar, pv in zip(bars, pval_vals):
+            if pv >= 0.05:
+                bar.set_alpha(0.3)
+        for i, param in enumerate(all_params):
+            if param in PRESSURE_FOCUS:
+                bars[i].set_edgecolor("black")
+                bars[i].set_linewidth(2.0)
+        ax.axvline(0, color="black", lw=0.8)
+        ax.set_xlim(-0.65, 0.65)
+        ax.tick_params(labelsize=7)
+        ax.set_xlabel("Spearman ρ", fontsize=8)
+
+        cond_label = (f"α_p={b['ap']:.2f} [baseline]"
+                      if cond_name == "baseline"
+                      else f"α_p=α_c={b['ac']:.2f} [equalised]")
+        ax.set_title(f"{PRESSURE_LABELS[spec_name]}\n{cond_label}",
+                     fontsize=8.5, fontweight="bold")
+        if col == 0:
+            ax.set_ylabel("Parameter", fontsize=9)
+
+fig.suptitle(
+    f"Section C: Political Pressure — GSA Correlations\n"
+    f"Top row: baseline (α_p={b['ap']:.2f})  |  "
+    f"Bottom row: equalised (α_p=α_c={b['ac']:.2f})\n"
+    f"Bold border = pressure params, faded = p≥0.05  "
+    f"[Sigmoid spec: θ_p={THETA_P}, η_p={ETA_P}]",
+    fontsize=10, fontweight="bold",
 )
+plt.tight_layout()
+fig_c_path = os.path.join(ROOT_DIR, "results", "figures", "fig_pressure_spec_test.png")
+fig.savefig(fig_c_path, dpi=150, bbox_inches="tight")
+plt.close(fig)
+print(f"\n  Figure C: {fig_c_path}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -520,5 +562,6 @@ print(f"    {csv_path_a}")
 print("  Section B outputs:")
 print("    results/figures/fig_cost_learning_spec_test.png")
 print("  Section C outputs:")
-print("    results/figures/fig_pressure_spec_test.png")
+print(f"    {fig_c_path}")
+print(f"    (3 specs × baseline α_p={b['ap']:.4f} + equalised α_p=α_c={b['ac']:.4f})")
 print(f"{SEP}\n")

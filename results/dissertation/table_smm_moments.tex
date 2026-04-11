@@ -1,17 +1,18 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption{SMM Moment Targets and Model-Implied Values at Calibrated Parameters. Model-implied values evaluated with $n = 1{,}000$ MC draws.}
+\caption{SMM Moment Targets vs.\ Model-Implied Values at Calibrated Parameters ($n = 1{,}000$ MC draws).}
 \label{tab:smm_moments}
-\begin{tabular}{lrrr}
+\begin{tabular}{clrrr}
 \toprule
-\textbf{Moment} & \textbf{Description} & \textbf{Target} & \textbf{Model-implied} \\
+\textbf{Moment} & \textbf{Description} & \textbf{Target} & \textbf{Model} & \textbf{Deviation} \\
 \midrule
-M1 & EU--US adoption gap ($\sigma_{EU,1} - \sigma_{US,1}$) & 0.23 & 0.074 \\
-M2 & Mean US adoption period $\mid$ adopting & 3.50 & 3.379 \\
-M3 & EU leadership ratio ($\sigma_{EU,1} / \max(\sigma_{US,1}, \sigma_{CN,1})$) & 2.50 & 1.446 \\
-M4 & Stagnation probability $P(0.5 \leq W_T < \theta)$ & 0.15 & 0.013 \\
-M5 & China period-1 adoption probability ($\sigma_{CN,1}$) & 0.05 & 0.087 \\
+M1 & EU--US period-1 adoption gap $(\sigma_{EU,1} - \sigma_{US,1})$        & 0.250 & 0.224 & $-0.026$ \\
+M2 & US period-1 adoption probability $(\sigma_{US,1})$                    & 0.100 & 0.102 & $+0.002$ \\
+M3 & EU leadership ratio $(\sigma_{EU,1} / \sigma_{US,1})$                 & 2.500 & 3.205 & $+0.705$ \\
+M4 & China period-1 adoption probability $(\sigma_{CN,1})$                 & 0.050 & 0.078 & $+0.028$ \\
+M5 & P(zero adoption by period 2)                                          & 0.300 & 0.300 & $+0.000$ \\
+M6 & Mean coordination timing $\mid$ success (periods)                     & 5.000 & 4.919 & $-0.081$ \\
 \bottomrule
 \end{tabular}
 \end{table}
