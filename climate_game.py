@@ -94,7 +94,9 @@ def climate_damage(player: str, t: int, W: float, params: GameParams) -> float:
     return params.damages[player] * (1 + params.kappa * t) * (1 - S)
 
 
-def political_pressure(player: str, W: float, params: GameParams) -> float:
+def political_pressure(player: str, t: int, W: float, params: GameParams) -> float:
+    if t <= 1:
+        return 0.0
     return params.pressure[player] * W
 
 
@@ -111,7 +113,7 @@ def flow_adopt(player: str, t: int, W: float, params: GameParams) -> float:
 
 
 def flow_delay(player: str, t: int, W: float, params: GameParams) -> float:
-    return -political_pressure(player, W, params) + flow_state(player, t, W, params)
+    return -political_pressure(player, t, W, params) + flow_state(player, t, W, params)
 
 
 # ─── QRE ──────────────────────────────────────────────────────────

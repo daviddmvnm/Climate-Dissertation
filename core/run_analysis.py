@@ -606,14 +606,14 @@ def run_gsa(params, raw, weights, n_samples, gsa_mc, seed=42):
         
         costs_gsa    = {b: params.costs[b]    * draw[f"cost_{b}"]     for b in PLAYERS}
         pressure_gsa = {b: params.pressure[b] * draw[f"pressure_{b}"] for b in PLAYERS}
-        
+
         # Build GameParams with the new heterogeneous maps
         p_gsa = GameParams(**{
             **params.__dict__,
             "discount": disc,
             "costs":    costs_gsa,
             "pressure": pressure_gsa,
-            "lam":      lam_map_gsa, # Pass the dictionary
+            "lam":      lam_map_gsa,
             "theta":    draw["theta"],
             "gamma":    draw["gamma"],
             "eta":      draw["eta"],

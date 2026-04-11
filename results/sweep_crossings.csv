@@ -1,21 +1,21 @@
 channel,cross_90_pct,cross_95_pct
-λ_US,156.79,381.11
+λ_US,100.71,100.71
 λ_EU,,
 λ_CN,,
 λ_RoW,,
-δ_EU,,
-δ_US,10.31,15.76
-δ_CN,13.64,
-δ_RoW,,
-δ_US=δ_CN,6.75,6.75
-Global cost,-15.45,-24.55
-CN cost,-70.0,
-US cost,-26.36,-37.27
-RoW cost,-61.82,
+δ_EU,3.21,
+δ_US,4.85,10.31
+δ_CN,3.41,18.75
+δ_RoW,23.08,
+δ_US=δ_CN,1.47,6.75
+Global cost,-6.36,-15.45
+CN cost,-37.27,
+US cost,-15.45,-26.36
+RoW cost,-43.64,-80.0
 US pressure,,
 CN pressure,,
 Global pressure,,
-γ (learning),132.72,
-θ (threshold),-22.16,-22.16
-κ (damage speed),92.8,161.8
-η (sigmoid steep),,
+γ (learning),61.8,
+θ (threshold),-17.05,-22.16
+κ (damage speed),58.2,127.2
+η (sigmoid steep),42.42,

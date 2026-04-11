@@ -1,0 +1,3 @@
+spec,success_rate,mean_coord_time,fm_US,fm_EU,fm_CN,fm_RoW,w_RoW,fm_IND
+4-bloc baseline,0.7867,3.818,0.0867,0.3667,0.12,0.0067,0.1902,
+5-bloc (IND split),0.2633,3.785,0.0767,0.12,0.0133,0.0033,0.1266,0.0
