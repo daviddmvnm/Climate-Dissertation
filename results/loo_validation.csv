@@ -1,8 +1,0 @@
-dropped_moment,moment_name,obj,α_c_base,α_c_loo,α_c_pct_chg,α_d_base,α_d_loo,α_d_pct_chg,α_p_base,α_p_loo,α_p_pct_chg,α_b_base,α_b_loo,α_b_pct_chg,rank_change,hierarchy_preserved
-M1,EU - US adoption gap,0.007392,3.2878,3.9312,19.6,0.8937,0.1,-88.8,0.1,9.0377,8937.7,1.2311,1.9143,55.5,True,False
-M2,US period-1 adoption prob,0.005868,3.2878,3.796,15.5,0.8937,0.1,-88.8,0.1,8.3966,8296.6,1.2311,1.8892,53.5,True,False
-M3,EU lead ratio (EU/US),0.006414,3.2878,3.3438,1.7,0.8937,0.9124,2.1,0.1,0.1,0.0,1.2311,1.2366,0.4,False,True
-M4,CN period-1 adoption prob,0.003558,3.2878,3.288,0.0,0.8937,0.9063,1.4,0.1,0.1,0.0,1.2311,1.2267,-0.4,False,True
-M5,P(zero adoption by t=2),0.005373,3.2878,3.9593,20.4,0.8937,0.1,-88.8,0.1,9.4538,9353.8,1.2311,1.8103,47.0,True,False
-M6,Mean coord timing | success,0.00119,3.2878,3.9702,20.8,0.8937,0.3972,-55.6,0.1,4.6366,4536.6,1.2311,1.8087,46.9,True,False
-M7,Accel ratio Δ_late/Δ_early,0.00253,3.2878,3.3384,1.5,0.8937,0.8699,-2.7,0.1,0.1,0.0,1.2311,1.1853,-3.7,False,True

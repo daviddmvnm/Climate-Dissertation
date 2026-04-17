@@ -48,7 +48,7 @@ bloc_data = build_bloc_data(data_dir=os.path.join(ROOT_DIR, "data"))
 raw       = bloc_data.set_index("bloc")
 weights   = {}
 for bloc in PLAYERS:
-    weights[bloc] = 0.5*raw.loc[bloc,"emission_share"] + 0.5*raw.loc[bloc,"gdp_share"]
+    weights[bloc] = 0.3*raw.loc[bloc,"emission_share"] + 0.7*raw.loc[bloc,"gdp_share"]
 total_w = sum(weights.values())
 weights = {k: v/total_w for k,v in weights.items()}
 
@@ -68,7 +68,8 @@ except FileNotFoundError as e:
 # Re-solve for distribution plots
 from run_analysis import build_params
 b = SMM_BASELINE
-params = build_params(raw, weights, ac=b["ac"], ad=b["ad"], ap=b["ap"], ab=b["ab"], lam=b["lam"])
+params = build_params(raw, weights, ac=b["ac"], ad=b["ad"], ap=b["ap"], ab=b["ab"],
+                      a_spill=b.get("a_spill"), lam=b["lam"])
 V, sigma, _, _ = solve_model(params)
 W_paths, adopt_time = monte_carlo(V, sigma, params, n_runs=1000, seed=42)
 idx = {p: i for i, p in enumerate(PLAYERS)}
@@ -93,7 +94,7 @@ def tex_table(caption, label, header, rows, note=None):
         r"\midrule",
     ]
     for i, row in enumerate(rows):
-        if row == "MIDRULE":
+        if row == "MIDRULE" or row == ["MIDRULE"]:
             lines.append(r"\midrule")
         else:
             lines.append(" & ".join(str(c) for c in row) + r" \\")
@@ -116,20 +117,21 @@ def write_tex(filename, content):
 
 param_latex = {
     "theta":        r"$\theta$ (Threshold)",
-    "cost_CN":      r"Cost$_{CN}$", "cost_US": r"Cost$_{US}$", 
+    "cost_CN":      r"Cost$_{CN}$", "cost_US": r"Cost$_{US}$",
     "cost_RoW":     r"Cost$_{RoW}$", "cost_EU": r"Cost$_{EU}$",
-    "delta_CN":     r"$\delta_{CN}$ (Patience)", "delta_US": r"$\delta_{US}$", 
+    "delta_CN":     r"$\delta_{CN}$ (Patience)", "delta_US": r"$\delta_{US}$",
     "delta_RoW":    r"$\delta_{RoW}$", "delta_EU": r"$\delta_{EU}$",
-    "lam_CN":       r"$\lambda_{CN}$ (Rationality)", "lam_US": r"$\lambda_{US}$", 
+    "lam_CN":       r"$\lambda_{CN}$ (Rationality)", "lam_US": r"$\lambda_{US}$",
     "lam_EU":       r"$\lambda_{EU}$", "lam_RoW": r"$\lambda_{RoW}$",
     "eta":          r"$\eta$ (Sigmoid)", "kappa": r"$\kappa$ (Damage)", "gamma": r"$\gamma$ (Learning)",
-    "pressure_CN":  r"Pressure$_{CN}$", "pressure_US": r"Pressure$_{US}$", 
+    "pressure_CN":  r"Pressure$_{CN}$", "pressure_US": r"Pressure$_{US}$",
     "pressure_EU":  r"Pressure$_{EU}$", "pressure_RoW": r"Pressure$_{RoW}$",
+    "phi":          r"$\phi$ (Spillover mix)",
 }
 
 param_order = [
-    "theta", "cost_CN", "cost_US", "delta_CN", "delta_US", 
-    "lam_CN", "lam_US", "gamma", "kappa", "eta",
+    "theta", "cost_CN", "cost_US", "delta_CN", "delta_US",
+    "lam_CN", "lam_US", "gamma", "kappa", "eta", "phi",
     "cost_RoW", "cost_EU", "delta_RoW", "delta_EU",
     "lam_EU", "lam_RoW", "pressure_CN", "pressure_US", "pressure_EU", "pressure_RoW"
 ]
@@ -269,11 +271,12 @@ tex = r"""\begin{table}[htbp]
 \midrule
 \multicolumn{4}{l}{\textit{SMM-estimated (Nelder-Mead, best of 4 starts)}} \\[2pt]
 """ + (
-    rf"$\alpha_c$ & Transition cost scaling         & {b['ac']:.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_c$ & Baseline transition cost        & {b['ac']:.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_{{\text{{spill}}}}$ & Adoption spillover scaling & {b.get('a_spill', b['ap']):.4f} & Estimated \\"  + "\n"
     rf"$\alpha_d$ & Climate damage scaling          & {b['ad']:.4f} & Estimated \\"  + "\n"
-    rf"$\alpha_p$ & Political pressure scaling      & {b['ap']:.4f} & Estimated \\"  + "\n"
     rf"$\alpha_b$ & Coordination benefit scaling    & {b['ab']:.4f} & Estimated \\[6pt]"  + "\n"
 ) + r"""\multicolumn{4}{l}{\textit{Fixed structural}} \\[2pt]
+$\phi$     & Spillover mixing (cost-learning vs pressure) & 0.50 & Fixed \\
 $\lambda$  & QRE rationality (homogeneous)   & 1.54   & Fixed \\
 $\delta_{US}$  & US discount factor          & 0.75   & Fixed \\
 $\delta_{EU}$  & EU discount factor          & 0.85   & Fixed \\
@@ -284,7 +287,7 @@ $\theta$   & Coalition threshold             & 0.80   & Fixed \\
 $\gamma$   & Learning spillover rate         & 0.25   & Fixed \\
 $\kappa$   & Damage accumulation speed       & 0.05   & Fixed \\
 \bottomrule
-\multicolumn{4}{p{10cm}}{\footnotesize \textit{Note:} SMM minimises weighted squared distance between model-implied and empirical moments M1--M5. $\lambda$ is held fixed throughout estimation; it is not recovered by SMM. All fixed parameters are held constant across estimation and the full sensitivity analysis.}
+\multicolumn{4}{p{10cm}}{\footnotesize \textit{Note:} SMM minimises weighted squared distance between model-implied and empirical moments M1--M6. $\phi$ controls the internal split between cost learning and pressure within the spillover channel; it is held fixed at 0.5 during estimation and varied in sensitivity analysis.}
 \\
 \end{tabular}
 \end{table}
@@ -365,41 +368,36 @@ print("Generating Table: SMM moment fit...")
 MOMENT_TARGETS = [0.23, 3.50, 2.50, 0.15, 0.05]
 MOMENT_WEIGHTS = [1.0,  0.2,  0.2,  1.0,  1.0]
 
-# Compute model-implied moments from already-solved baseline
-G0   = (0, 0, 0, 0)
-s_EU = sigma[1][G0][idx["EU"]]
-s_US = sigma[1][G0][idx["US"]]
-s_CN = sigma[1][G0][idx["CN"]]
+# Compute model-implied moments using the canonical SMM definitions.
+# Imported from smm_calibration so the table cannot drift from the actual
+# calibration spec.
+sys.path.insert(0, os.path.join(_r, "..", "calibration"))
+from smm_calibration import (
+    compute_moments as smm_compute_moments,
+    MOMENTS_DATA as SMM_TARGETS,
+)
 
-m1_model = s_EU - s_US
-m3_model = s_EU / max(s_US, s_CN, 1e-6)
-m5_model = float(s_CN)
+theta_smm = [b["ac"], b.get("a_spill", b["ap"]), b["ad"], b["ab"]]
+moment_implied = smm_compute_moments(theta_smm, raw, weights)
 
-us_times = adopt_time[:, idx["US"]]
-us_finite = us_times[us_times < np.inf]
-m2_model = float(us_finite.mean()) if len(us_finite) > 0 else float(params.T)
-
-W_final = W_paths[:, -1]
-m4_model = float(((W_final >= 0.5) & (W_final < params.theta)).mean())
-
-MOMENT_IMPLIED = [m1_model, m2_model, m3_model, m4_model, m5_model]
-
-moment_rows = [
-    ["M1", r"EU--US adoption gap ($\sigma_{EU,1} - \sigma_{US,1}$)",
-     "0.23", f"{m1_model:.3f}"],
-    ["M2", r"Mean US adoption period $\mid$ adopting",
-     "3.50", f"{m2_model:.3f}"],
-    ["M3", r"EU leadership ratio ($\sigma_{EU,1} / \max(\sigma_{US,1}, \sigma_{CN,1})$)",
-     "2.50", f"{m3_model:.3f}"],
-    ["M4", r"Stagnation probability $P(0.5 \leq W_T < \theta)$",
-     "0.15", f"{m4_model:.3f}"],
-    ["M5", r"China period-1 adoption probability ($\sigma_{CN,1}$)",
-     "0.05", f"{m5_model:.3f}"],
+moment_descriptions = [
+    ["M1", r"EU--US adoption gap, $t=1$ ($\sigma_{EU,1} - \sigma_{US,1}$)"],
+    ["M2", r"US period-1 adoption probability ($\sigma_{US,1}$)"],
+    ["M3", r"China period-1 adoption probability ($\sigma_{CN,1}$)"],
+    ["M4", r"China period-2 / period-1 adoption ratio"],
+    ["M5", r"US expected period-2 adoption probability"],
+    ["M6", r"Mean coordination timing $\mid$ success"],
 ]
+
+moment_rows = []
+for (label, desc), target, model in zip(moment_descriptions, SMM_TARGETS, moment_implied):
+    moment_rows.append([label, desc, f"{float(target):.3f}", f"{float(model):.3f}"])
 
 tex_moments = tex_table(
     caption=(r"SMM Moment Targets and Model-Implied Values at Calibrated Parameters. "
-             r"Model-implied values evaluated with $n = 1{,}000$ MC draws."),
+             r"Moments M1--M3 are evaluated at $W_0 = 0$ and identify the static parameters; "
+             r"M4--M5 capture period-2 acceleration and identify the spillover channel; "
+             r"M6 anchors aggregate timing."),
     label="smm_moments",
     header=["Moment", "Description", "Target", "Model-implied"],
     rows=moment_rows,
@@ -503,6 +501,89 @@ write_tex("table_baseline_diagnostics.tex", tex_diag)
 
 
 # ══════════════════════════════════════════════════════════════════
+# TABLE — LAYER 1 CALIBRATED PARAMETERS
+# ══════════════════════════════════════════════════════════════════
+print("Generating Table: Layer 1 parameters...")
+
+l1_rows = []
+for p in PLAYERS:
+    l1_rows.append([
+        p,
+        f"{params.costs[p]:.3f}",
+        f"{params.spillover[p]:.3f}",
+        f"{params.pressure[p]:.3f}",
+        f"{params.damages[p]:.3f}",
+        f"{params.weights[p]:.3f}",
+        f"{params.discount[p]:.2f}",
+    ])
+
+# Append global scaling rows. Two rows: the first shows the alphas that
+# scale per-bloc columns; the second shows the alphas that have no per-bloc
+# analog (α_b is a single global benefit weight, φ is the mixing parameter).
+# tex_table joins cells with " & ", so a multicolumn cell consumes two column
+# slots and we pass one fewer cell for those rows.
+a_spill_val = b.get('a_spill', b['ap'])
+l1_rows.append("MIDRULE")
+l1_rows.append([
+    r"\textit{Per-bloc scale}",
+    rf"$\alpha_c={b['ac']:.2f}$",
+    rf"\multicolumn{{2}}{{c}}{{$\alpha_{{\text{{spill}}}}={a_spill_val:.2f}$}}",
+    rf"$\alpha_d={b['ad']:.2f}$",
+    "---",
+    "---",
+])
+l1_rows.append([
+    r"\textit{Global only}",
+    rf"\multicolumn{{6}}{{c}}{{$\alpha_b={b['ab']:.2f}$ \quad $\phi=0.50$}}",
+])
+
+note = (rf"Per-bloc values are products of the Layer 1 ordinal pattern and the SMM-estimated "
+        rf"global scaling vector shown beneath the midrule. $\alpha_{{\text{{spill}}}}$ jointly "
+        rf"scales both the cost-learning coefficient $\tilde{{c}}_i$ and the pressure sensitivity "
+        rf"$p_i$. The coordination benefit weight $\alpha_b$ and the spillover mixing parameter "
+        rf"$\phi$ apply globally and have no per-bloc decomposition.")
+
+tex_l1 = tex_table(
+    caption=(r"Calibrated per-bloc parameters at SMM baseline. Costs and spillover share the same "
+             r"cross-bloc heterogeneity pattern (composite cost index); pressure is scaled by trade "
+             r"openness."),
+    label="layer1_params",
+    header=["Bloc", r"$c_i^0$", r"$\tilde{c}_i$", r"$p_i$", r"$d_i^0$", r"$w_i$", r"$\delta_i$"],
+    rows=l1_rows,
+    note=note,
+)
+write_tex("table_layer1_params.tex", tex_l1)
+
+# ══════════════════════════════════════════════════════════════════
+# TABLE — LAMBDA SPILLOVER (RATIONALITY DECOMPOSITION)
+# ══════════════════════════════════════════════════════════════════
+print("Generating Table: Lambda spillover decomposition...")
+
+lam_rows = []
+for target_lam, target_name in [("lam_US", "US"), ("lam_CN", "CN")]:
+    row = [rf"$\lambda_{{{target_name}}}$"]
+    for outcome in ["fm_US", "fm_EU", "fm_CN", "mean_coord_time"]:
+        sub = df_gsa_corr[(df_gsa_corr["parameter"] == target_lam) &
+                          (df_gsa_corr["outcome"] == outcome)]
+        if not sub.empty:
+            rho = sub.iloc[0]["rho"]
+            pval = sub.iloc[0]["pvalue"]
+            sig = "**" if pval < 0.01 else ("*" if pval < 0.05 else "")
+            row.append(f"{rho:+.3f}{sig}")
+        else:
+            row.append("---")
+    lam_rows.append(row)
+
+tex_lam = tex_table(
+    caption=r"Rationality spillover effects. Spearman $\rho$ between bloc-specific $\lambda$ and "
+            r"coordination outcomes from 1{,}000 GSA draws. ** $p<0.01$, * $p<0.05$.",
+    label="lambda_spillover",
+    header=["Parameter", r"$fm_{US}$", r"$fm_{EU}$", r"$fm_{CN}$", r"Coord.\ timing"],
+    rows=lam_rows,
+)
+write_tex("table_lambda_spillover.tex", tex_lam)
+
+# ══════════════════════════════════════════════════════════════════
 # COMPILE TABLE .tex → PNG  (pdflatex → pdfcrop → pdftoppm)
 # ══════════════════════════════════════════════════════════════════
 import subprocess, tempfile, shutil
@@ -546,7 +627,7 @@ def compile_table_png(tex_fragment_path, out_png_path):
 print("Compiling table PNGs via pdflatex...")
 for tbl in ["table_smm_moments", "table_equilibrium_uniqueness", "table_gsa_correlations",
             "table_smm_alphas", "table_sweep_crossings", "table_baseline_diagnostics",
-            "table_functional_form_robustness"]:
+            "table_functional_form_robustness", "table_layer1_params", "table_lambda_spillover"]:
     tex_path = os.path.join(OUT, f"{tbl}.tex")
     png_path = os.path.join(OUT, f"{tbl}.png")
     if os.path.exists(tex_path):
