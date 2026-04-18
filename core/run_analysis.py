@@ -194,7 +194,7 @@ KAPPA      = 0.05
 DISCOUNT   = {"US": 0.75, "EU": 0.85, "CN": 0.80, "RoW": 0.70}
 
 # Original grid-search defaults (used as pre-SMM baseline reference)
-BASE_ALPHAS = dict(ac=3.0, ad=0.25, ap=1.5, ab=2.0)
+BASE_ALPHAS = dict(ac=3.0, ad=0.25, a_spill=1.5, ab=2.0)
 
 # SMM-calibrated baseline — loaded from saved calibration output
 def _load_smm_baseline():
@@ -204,8 +204,8 @@ def _load_smm_baseline():
     if not _path.exists():
         # Return BASE_ALPHAS as fallback so smm_calibration.py can import this module
         return dict(**BASE_ALPHAS, lam=1.54)
-    ac, ad, ap, ab = np.load(_path)
-    return dict(ac=float(ac), ad=float(ad), ap=float(ap), ab=float(ab), lam=1.54)
+    ac, ad, a_spill, ab = np.load(_path)
+    return dict(ac=float(ac), ad=float(ad), a_spill=float(a_spill), ab=float(ab), lam=1.54)
 
 SMM_BASELINE = _load_smm_baseline()
 
@@ -221,7 +221,7 @@ BLOC_COLOURS = {
 # PARAM BUILDER  (mirrors Cell 4)
 # ──────────────────────────────────────────────────────────────────────────────
 
-def build_params(raw, weights, ac, ad, ap, ab, eps=EPSILON,
+def build_params(raw, weights, ac, ad, a_spill, ab, eps=EPSILON,
                  theta=THETA, eta=ETA, lam=LAMBDA,
                  gamma=GAMMA, kappa=KAPPA, phi=0.5,
                  discount=None, lambda_map=None):
@@ -250,9 +250,9 @@ def build_params(raw, weights, ac, ad, ap, ab, eps=EPSILON,
         composite = eff_ci * afford
         ratio_cost = composite / ref_composite
         c[bloc]       = ac * ratio_cost
-        c_tilde[bloc] = ap * ratio_cost
+        c_tilde[bloc] = a_spill * ratio_cost
         d[bloc]       = ad * (raw.loc[bloc, "ag_value_pct"] / ag_ref)
-        p[bloc]       = ap * (raw.loc[bloc, "trade_pct"] / 100.0)
+        p[bloc]       = a_spill * (raw.loc[bloc, "trade_pct"] / 100.0)
 
     return GameParams(
         T=10,
@@ -715,7 +715,7 @@ def main():
     # ── Build SMM baseline params ─────────────────────────────────
     b = SMM_BASELINE
     params = build_params(raw, weights,
-                          ac=b["ac"], ad=b["ad"], ap=b["ap"], ab=b["ab"],
+                          ac=b["ac"], ad=b["ad"], a_spill=b["a_spill"], ab=b["ab"],
                           lam=b["lam"])
 
     # ── Sweeps ────────────────────────────────────────────────────

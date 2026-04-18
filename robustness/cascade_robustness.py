@@ -80,7 +80,7 @@ def solve_point(alpha_c_scale, discount_shift, lambda_us, raw, weights):
     params = build_params(
         raw, weights,
         ac=b["ac"] * alpha_c_scale,
-        ad=b["ad"], ap=b["ap"], ab=b["ab"],
+        ad=b["ad"], a_spill=b["a_spill"], ab=b["ab"],
         discount=discount,
         lambda_map=lam_map,
     )

@@ -79,10 +79,10 @@ weights = {k: v/total_w for k, v in weights.items()}
 
 b      = SMM_BASELINE
 _base_params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                             ap=b["ap"], ab=b["ab"], lam=b["lam"])
-# Equalised params: α_p = α_c so pressure and cost are on the same cardinal scale
+                             a_spill=b["a_spill"], ab=b["ab"], lam=b["lam"])
+# Equalised params: α_spill = α_c so spillover and cost are on the same cardinal scale
 _eq_params   = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                             ap=b["ac"], ab=b["ab"], lam=b["lam"])
+                             a_spill=b["ac"], ab=b["ab"], lam=b["lam"])
 
 
 # ── Shared GSA runner ──────────────────────────────────────────────────────────
@@ -200,7 +200,7 @@ def run_benefit_spec(spec_name, benefit_fn):
     climate_game.threshold_sigmoid = benefit_fn
     try:
         params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                              ap=b["ap"], ab=b["ab"], lam=b["lam"])
+                              a_spill=b["a_spill"], ab=b["ab"], lam=b["lam"])
 
         # Baseline MC
         _, _, _, _, success, mean_W, mean_ct, fm = run_mc(params, BASELINE_MC, seed=42)
@@ -405,7 +405,7 @@ for spec_name, cost_fn in COST_SPECS.items():
     climate_game.adoption_cost = cost_fn
     try:
         params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                              ap=b["ap"], ab=b["ab"], lam=b["lam"])
+                              a_spill=b["a_spill"], ab=b["ab"], lam=b["lam"])
         _, _, _, _, base_succ, *_ = run_mc(params, 1000, seed=42)
         cost_success[spec_name] = round(base_succ, 4)
         df_gsa = run_gsa(params)
@@ -453,7 +453,7 @@ gsa_bar_figure(
 
 print(f"\n{SEP}")
 print("  SECTION C — POLITICAL PRESSURE SPECIFICATION  [political_pressure]")
-print(f"  Baseline α_p={b['ap']:.4f}   Equalised α_p=α_c={b['ac']:.4f}")
+print(f"  Baseline α_spill={b['a_spill']:.4f}   Equalised α_spill=α_c={b['ac']:.4f}")
 print(f"{SEP}")
 
 THETA_P = 0.40   # Visibility threshold for sigmoid pressure
@@ -490,7 +490,7 @@ for spec_name, pressure_fn in PRESSURE_SPECS.items():
 
 # Console comparison: for each spec, show baseline vs equalised for focus params
 print(f"\n  PRESSURE FOCUS PARAM CORRELATIONS  (* = p<0.05)")
-print(f"  Key: (B)=baseline α_p={b['ap']:.2f}   (E)=equalised α_p=α_c={b['ac']:.2f}")
+print(f"  Key: (B)=baseline α_spill={b['a_spill']:.2f}   (E)=equalised α_spill=α_c={b['ac']:.2f}")
 for spec_name in PRESSURE_SPECS:
     print(f"\n  [{spec_name}]")
     print(f"  {'Parameter':<18} {'Base ρ':>8}   {'Equal ρ':>8}   {'Δρ':>7}")
@@ -526,9 +526,9 @@ for col, (spec_name, _) in enumerate(PRESSURE_SPECS.items()):
         ax.tick_params(labelsize=7)
         ax.set_xlabel("Spearman ρ", fontsize=8)
 
-        cond_label = (f"α_p={b['ap']:.2f} [baseline]"
+        cond_label = (f"α_spill={b['a_spill']:.2f} [baseline]"
                       if cond_name == "baseline"
-                      else f"α_p=α_c={b['ac']:.2f} [equalised]")
+                      else f"α_spill=α_c={b['ac']:.2f} [equalised]")
         ax.set_title(f"{PRESSURE_LABELS[spec_name]}\n{cond_label}",
                      fontsize=8.5, fontweight="bold")
         if col == 0:
@@ -536,8 +536,8 @@ for col, (spec_name, _) in enumerate(PRESSURE_SPECS.items()):
 
 fig.suptitle(
     f"Section C: Political Pressure — GSA Correlations\n"
-    f"Top row: baseline (α_p={b['ap']:.2f})  |  "
-    f"Bottom row: equalised (α_p=α_c={b['ac']:.2f})\n"
+    f"Top row: baseline (α_spill={b['a_spill']:.2f})  |  "
+    f"Bottom row: equalised (α_spill=α_c={b['ac']:.2f})\n"
     f"Bold border = pressure params, faded = p≥0.05  "
     f"[Sigmoid spec: θ_p={THETA_P}, η_p={ETA_P}]",
     fontsize=10, fontweight="bold",
@@ -563,5 +563,5 @@ print("  Section B outputs:")
 print("    results/figures/fig_cost_learning_spec_test.png")
 print("  Section C outputs:")
 print(f"    {fig_c_path}")
-print(f"    (3 specs × baseline α_p={b['ap']:.4f} + equalised α_p=α_c={b['ac']:.4f})")
+print(f"    (3 specs × baseline α_spill={b['a_spill']:.4f} + equalised α_spill=α_c={b['ac']:.4f})")
 print(f"{SEP}\n")

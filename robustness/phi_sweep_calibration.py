@@ -48,7 +48,7 @@ N_MOMENTS = len(MOMENTS_DATA)
 
 def build_params_at_phi(ac, a_spill, ad, ab, raw, weights, phi):
     """Build GameParams at a given φ; homogeneous λ, fixed δ/η/κ."""
-    params = build_params(raw, weights, ac=ac, ad=ad, ap=a_spill, ab=ab,
+    params = build_params(raw, weights, ac=ac, ad=ad, a_spill=a_spill, ab=ab,
                           discount=DISCOUNT_FIXED,
                           eta=ETA_FIXED, kappa=KAPPA_FIXED,
                           phi=phi)

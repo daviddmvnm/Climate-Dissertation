@@ -68,8 +68,8 @@ except FileNotFoundError as e:
 # Re-solve for distribution plots
 from run_analysis import build_params
 b = SMM_BASELINE
-params = build_params(raw, weights, ac=b["ac"], ad=b["ad"], ap=b["ap"], ab=b["ab"],
-                      a_spill=b.get("a_spill"), lam=b["lam"])
+params = build_params(raw, weights, ac=b["ac"], ad=b["ad"], a_spill=b["a_spill"], ab=b["ab"],
+                      lam=b["lam"])
 V, sigma, _, _ = solve_model(params)
 W_paths, adopt_time = monte_carlo(V, sigma, params, n_runs=1000, seed=42)
 idx = {p: i for i, p in enumerate(PLAYERS)}
@@ -272,7 +272,7 @@ tex = r"""\begin{table}[htbp]
 \multicolumn{4}{l}{\textit{SMM-estimated (Nelder-Mead, best of 4 starts)}} \\[2pt]
 """ + (
     rf"$\alpha_c$ & Baseline transition cost        & {b['ac']:.4f} & Estimated \\"  + "\n"
-    rf"$\alpha_{{\text{{spill}}}}$ & Adoption spillover scaling & {b.get('a_spill', b['ap']):.4f} & Estimated \\"  + "\n"
+    rf"$\alpha_{{\text{{spill}}}}$ & Adoption spillover scaling & {b['a_spill']:.4f} & Estimated \\"  + "\n"
     rf"$\alpha_d$ & Climate damage scaling          & {b['ad']:.4f} & Estimated \\"  + "\n"
     rf"$\alpha_b$ & Coordination benefit scaling    & {b['ab']:.4f} & Estimated \\[6pt]"  + "\n"
 ) + r"""\multicolumn{4}{l}{\textit{Fixed structural}} \\[2pt]
@@ -293,64 +293,6 @@ $\kappa$   & Damage accumulation speed       & 0.05   & Fixed \\
 \end{table}
 """
 write_tex("table_smm_alphas.tex", tex)
-
-# ══════════════════════════════════════════════════════════════════
-# TABLE — SMM STANDARD ERRORS & CONFIDENCE INTERVALS
-# ══════════════════════════════════════════════════════════════════
-_se_path = os.path.join(ROOT_DIR, "results", "smm_standard_errors.csv")
-if os.path.exists(_se_path):
-    print("Generating Table: SMM standard errors...")
-    df_se = pd.read_csv(_se_path)
-
-    symbol_map = {
-        "α_c": r"$\alpha_c$",
-        "α_d": r"$\alpha_d$",
-        "α_p": r"$\alpha_p$",
-        "α_b": r"$\alpha_b$",
-    }
-
-    header = [
-        "Parameter", r"$\hat{\theta}$",
-        r"SE$_{\text{asym}}$", r"95\% CI (asymptotic)",
-        r"95\% CI (bootstrap)",
-    ]
-    rows = []
-    for _, r in df_se.iterrows():
-        sym = symbol_map.get(r["param"], r["param"])
-        if r.get("on_bound", False):
-            sym = sym + r"$^{\dagger}$"
-        est = f"{r['estimate']:.4f}"
-        se  = f"{r['se_sandwich']:.4f}"
-        ci_a = f"[{r['ci95_lo_sand']:.3f},\\,{r['ci95_hi_sand']:.3f}]"
-        if "ci95_lo_boot" in df_se.columns and not pd.isna(r.get("ci95_lo_boot")):
-            ci_b = f"[{r['ci95_lo_boot']:.3f},\\,{r['ci95_hi_boot']:.3f}]"
-        else:
-            ci_b = "--"
-        rows.append([sym, est, se, ci_a, ci_b])
-
-    boot_n = int(df_se["boot_n"].iloc[0]) if "boot_n" in df_se.columns else None
-    note = (
-        "Asymptotic SE via the SMM sandwich "
-        r"$(G'WG)^{-1}G'W\Omega W G (G'WG)^{-1}$, with "
-        r"$G=\partial m/\partial\theta$ by central differences at $\hat\theta$, "
-        r"$W=\mathrm{diag}(w_k)$ the objective weights, and "
-        r"$\Omega=\mathrm{diag}(\sigma_k^2)$ with $\sigma_k=\min(1/\sqrt{w_k},\,0.5\,|m_k|)$ "
-        r"so low-weight moments do not dominate. Asymptotic CIs are clipped to "
-        r"the SMM search bounds $[0.1,10]$. "
-        r"Parametric bootstrap draws $m^*\sim\mathcal{N}(m,\,\Omega)$ and re-runs "
-        r"Nelder--Mead from $\hat\theta$; CI is the 2.5/97.5 percentile"
-        + (f" over $B={boot_n}$ replications." if boot_n else ".")
-        + r" $^{\dagger}$ estimate lies on a search bound; asymptotic normality "
-        r"does not apply and the bootstrap CI should be preferred."
-    )
-    tex_se = tex_table(
-        caption="Standard errors and 95\\% confidence intervals for SMM parameter estimates.",
-        label="smm_standard_errors",
-        header=header, rows=rows, note=note,
-    )
-    write_tex("table_smm_standard_errors.tex", tex_se)
-else:
-    print("  (skipping SMM SE table — run calibration/smm_standard_errors.py first)")
 
 # ══════════════════════════════════════════════════════════════════
 # TABLE — SWEEP CROSSINGS
@@ -422,10 +364,6 @@ write_tex("table_sweep_crossings.tex", tex)
 # ══════════════════════════════════════════════════════════════════
 print("Generating Table: SMM moment fit...")
 
-# Empirical targets (from smm_calibration.py)
-MOMENT_TARGETS = [0.23, 3.50, 2.50, 0.15, 0.05]
-MOMENT_WEIGHTS = [1.0,  0.2,  0.2,  1.0,  1.0]
-
 # Compute model-implied moments using the canonical SMM definitions.
 # Imported from smm_calibration so the table cannot drift from the actual
 # calibration spec.
@@ -435,7 +373,7 @@ from smm_calibration import (
     MOMENTS_DATA as SMM_TARGETS,
 )
 
-theta_smm = [b["ac"], b.get("a_spill", b["ap"]), b["ad"], b["ab"]]
+theta_smm = [b["ac"], b["ad"], b["a_spill"], b["ab"]]
 moment_implied = smm_compute_moments(theta_smm, raw, weights)
 
 moment_descriptions = [
@@ -559,60 +497,6 @@ write_tex("table_baseline_diagnostics.tex", tex_diag)
 
 
 # ══════════════════════════════════════════════════════════════════
-# TABLE — LAYER 1 CALIBRATED PARAMETERS
-# ══════════════════════════════════════════════════════════════════
-print("Generating Table: Layer 1 parameters...")
-
-l1_rows = []
-for p in PLAYERS:
-    l1_rows.append([
-        p,
-        f"{params.costs[p]:.3f}",
-        f"{params.spillover[p]:.3f}",
-        f"{params.pressure[p]:.3f}",
-        f"{params.damages[p]:.3f}",
-        f"{params.weights[p]:.3f}",
-        f"{params.discount[p]:.2f}",
-    ])
-
-# Append global scaling rows. Two rows: the first shows the alphas that
-# scale per-bloc columns; the second shows the alphas that have no per-bloc
-# analog (α_b is a single global benefit weight, φ is the mixing parameter).
-# tex_table joins cells with " & ", so a multicolumn cell consumes two column
-# slots and we pass one fewer cell for those rows.
-a_spill_val = b.get('a_spill', b['ap'])
-l1_rows.append("MIDRULE")
-l1_rows.append([
-    r"\textit{Per-bloc scale}",
-    rf"$\alpha_c={b['ac']:.2f}$",
-    rf"\multicolumn{{2}}{{c}}{{$\alpha_{{\text{{spill}}}}={a_spill_val:.2f}$}}",
-    rf"$\alpha_d={b['ad']:.2f}$",
-    "---",
-    "---",
-])
-l1_rows.append([
-    r"\textit{Global only}",
-    rf"\multicolumn{{6}}{{c}}{{$\alpha_b={b['ab']:.2f}$ \quad $\phi=0.50$}}",
-])
-
-note = (rf"Per-bloc values are products of the Layer 1 ordinal pattern and the SMM-estimated "
-        rf"global scaling vector shown beneath the midrule. $\alpha_{{\text{{spill}}}}$ jointly "
-        rf"scales both the cost-learning coefficient $\tilde{{c}}_i$ and the pressure sensitivity "
-        rf"$p_i$. The coordination benefit weight $\alpha_b$ and the spillover mixing parameter "
-        rf"$\phi$ apply globally and have no per-bloc decomposition.")
-
-tex_l1 = tex_table(
-    caption=(r"Calibrated per-bloc parameters at SMM baseline. Costs and spillover share the same "
-             r"cross-bloc heterogeneity pattern (composite cost index); pressure is scaled by trade "
-             r"openness."),
-    label="layer1_params",
-    header=["Bloc", r"$c_i^0$", r"$\tilde{c}_i$", r"$p_i$", r"$d_i^0$", r"$w_i$", r"$\delta_i$"],
-    rows=l1_rows,
-    note=note,
-)
-write_tex("table_layer1_params.tex", tex_l1)
-
-# ══════════════════════════════════════════════════════════════════
 # TABLE — LAMBDA SPILLOVER (RATIONALITY DECOMPOSITION)
 # ══════════════════════════════════════════════════════════════════
 print("Generating Table: Lambda spillover decomposition...")
@@ -640,58 +524,5 @@ tex_lam = tex_table(
     rows=lam_rows,
 )
 write_tex("table_lambda_spillover.tex", tex_lam)
-
-# ══════════════════════════════════════════════════════════════════
-# COMPILE TABLE .tex → PNG  (pdflatex → pdfcrop → pdftoppm)
-# ══════════════════════════════════════════════════════════════════
-import subprocess, tempfile, shutil
-
-def compile_table_png(tex_fragment_path, out_png_path):
-    """Wrap a .tex table fragment, compile to PDF, crop, convert to PNG."""
-    frag = open(tex_fragment_path).read()
-    wrapper = (
-        r"\documentclass{article}" + "\n"
-        r"\usepackage{booktabs,amsmath,amssymb}" + "\n"
-        r"\usepackage[margin=1cm]{geometry}" + "\n"
-        r"\pagestyle{empty}" + "\n"
-        r"\begin{document}" + "\n"
-        + frag + "\n"
-        r"\end{document}"
-    )
-    with tempfile.TemporaryDirectory() as td:
-        src = os.path.join(td, "table.tex")
-        pdf = os.path.join(td, "table.pdf")
-        crop = os.path.join(td, "table_crop.pdf")
-        with open(src, "w") as f:
-            f.write(wrapper)
-        r = subprocess.run(["pdflatex", "-interaction=nonstopmode", "-output-directory", td, src],
-                           capture_output=True)
-        if not os.path.exists(pdf):
-            print(f"  ✗ pdflatex failed for {tex_fragment_path}")
-            print(r.stdout.decode()[-500:])
-            return
-        subprocess.run(["pdfcrop", pdf, crop], capture_output=True)
-        src_pdf = crop if os.path.exists(crop) else pdf
-        result = subprocess.run(
-            ["pdftoppm", "-r", "200", "-png", src_pdf, os.path.join(td, "out")],
-            capture_output=True)
-        candidates = [f for f in os.listdir(td) if f.startswith("out") and f.endswith(".png")]
-        if candidates:
-            shutil.copy(os.path.join(td, sorted(candidates)[0]), out_png_path)
-            print(f"  ✓ {out_png_path}")
-        else:
-            print(f"  ✗ No PNG produced for {tex_fragment_path}")
-
-print("Compiling table PNGs via pdflatex...")
-for tbl in ["table_smm_moments", "table_equilibrium_uniqueness", "table_gsa_correlations",
-            "table_smm_alphas", "table_smm_standard_errors",
-            "table_sweep_crossings", "table_baseline_diagnostics",
-            "table_functional_form_robustness", "table_layer1_params", "table_lambda_spillover"]:
-    tex_path = os.path.join(OUT, f"{tbl}.tex")
-    png_path = os.path.join(OUT, f"{tbl}.png")
-    if os.path.exists(tex_path):
-        compile_table_png(tex_path, png_path)
-    else:
-        print(f"  ⚠ {tex_path} not found, skipping")
 
 print(f"\nDone. All dissertation outputs generated in {OUT}/")

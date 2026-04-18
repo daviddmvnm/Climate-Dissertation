@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
     b = SMM_BASELINE
     print(f"Baseline α_c={b['ac']:.3f} α_d={b['ad']:.3f} "
-          f"α_p={b['ap']:.3f} α_b={b['ab']:.3f} λ={b['lam']:.2f}")
+          f"α_spill={b['a_spill']:.3f} α_b={b['ab']:.3f} λ={b['lam']:.2f}")
     print(f"Grid: {N_SWEEP_PTS} points × {SWEEP_MC} MC\n")
 
     channel_order = ["δ_US=δ_CN", "Global cost", "δ_US", "δ_CN", "δ_EU", "θ"]
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         print(f"── {label}  δ={disc}")
         params = build_params(
             raw, weights,
-            ac=b["ac"], ad=b["ad"], ap=b["ap"], ab=b["ab"],
+            ac=b["ac"], ad=b["ad"], a_spill=b["a_spill"], ab=b["ab"],
             lam=b["lam"], discount=dict(disc),
         )
         base_success = run_mc(params, SWEEP_MC * 4, seed=SEED)

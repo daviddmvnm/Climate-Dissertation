@@ -69,7 +69,7 @@ weights = {k: v / total_w for k, v in weights.items()}
 
 b = SMM_BASELINE
 params = build_params(raw, weights, ac=b["ac"], ad=b["ad"],
-                      ap=b["ap"], ab=b["ab"], lam=b["lam"])
+                      a_spill=b["a_spill"], ab=b["ab"], lam=b["lam"])
 
 print("Running baseline solve...", flush=True)
 V, sigma_base, QA_table, QD_table = solve_model(params)
