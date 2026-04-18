@@ -6,7 +6,7 @@ Simulated Method of Moments calibration for the Climate Cooperation Markov Game.
 Canonical moment set (v2 writeup, §3.2.2):
   M1: EU/US period-1 adoption gap  σ_EU,1 − σ_US,1         (Target: 0.25)
   M2: US period-1 adoption prob    σ_US,1                  (Target: 0.10)
-  M3: China period-1 adoption prob σ_CN,1                  (Target: 0.05)
+  M3: China period-1 adoption prob σ_CN,1                  (Target: 0.10)
   M4: China period-2 / period-1 ratio                      (Target: 2.00)
       E[σ_CN,2 | CN not adopted at t=1, avg over others'
       period-1 actions] / σ_CN,1
@@ -52,7 +52,7 @@ PHI_FIXED      = 0.5
 MOMENTS_DATA = np.array([
     0.25,   # M1: EU − US period-1 adoption gap
     0.10,   # M2: US period-1 adoption probability
-    0.05,   # M3: CN period-1 adoption probability
+    0.10,   # M3: CN period-1 adoption probability
     2.00,   # M4: CN period-2 / period-1 ratio
     0.15,   # M5: US expected period-2 adoption probability
     5.00,   # M6: Mean coordination timing | success (periods)
@@ -196,13 +196,19 @@ def smm_objective(theta, raw, weights, moments_data=MOMENTS_DATA, phi=PHI_FIXED)
 
 
 # ── Multi-start optimisation ───────────────────────────────────────────────
+# Structured spread across the bound box [0.1, 10.0]^4 — one start
+# per region so the multi-start genuinely probes different basins:
+#   low corner   — tests whether params collapse to the lower bound
+#   high corner  — tests whether params blow up
+#   mid-range    — default exploration
+#   warm start   — refines at the current best theta (reproducibility check)
 STARTING_POINTS = [
-    [3.5,  0.30, 0.5,  3.0],
-    [2.0,  0.15, 2.5,  1.0],
-    [2.0,  0.30, 0.5,  1.0],
-    [3.0,  0.25, 1.5,  2.0],
+    [0.5,  0.10, 0.5,  0.5],
+    [5.0,  1.0,  5.0,  5.0],
+    [2.5,  0.5,  2.5,  1.5],
+    [3.6,  0.6,  7.7,  1.0],
 ]
-SCENARIO_LABELS = ["A", "B", "C", "Default"]
+SCENARIO_LABELS = ["low corner", "high corner", "mid", "warm"]
 
 NM_OPTIONS = {"maxiter": 1000, "xatol": 1e-4, "fatol": 1e-4, "disp": False}
 

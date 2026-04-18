@@ -197,7 +197,7 @@ def solve_model(params: GameParams):
             new_QA = {}
             new_QD = {}
 
-            for _ in range(2000):
+            for _ in range(300):
                 new_sigmas = {}
 
                 for i in active:
