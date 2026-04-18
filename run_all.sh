@@ -6,17 +6,12 @@ cd "$(dirname "$0")"
 PYTHON=".venv/bin/python"
 LOG="results/run_all.log"
 
-mkdir -p results/figures results/dissertation
+mkdir -p results/figures
 
 # ── Wipe all regenerated outputs ──────────────────────────────────
 echo "Clearing old outputs..."
-rm -f results/*.csv
+rm -f results/*.csv results/*.npy
 rm -f results/figures/*.png
-rm -f results/dissertation/*.tex \
-      results/dissertation/*.png \
-      results/dissertation/*.pdf \
-      results/dissertation/*.log \
-      results/dissertation/*.zip
 
 # ── Run pipeline ──────────────────────────────────────────────────
 run() {
@@ -29,12 +24,19 @@ run() {
 
 > "$LOG"  # reset log
 
+# Calibrate first: produces results/smm_best_theta.npy used by the rest.
+run calibration/smm_calibration.py
+run calibration/smm_verification.py
+
+# Baseline simulation, marginal sweeps, global sensitivity analysis.
 run core/run_analysis.py
-run core/game_diagram.py
-run core/dissertation_outputs.py
+
+# Robustness checks.
 run robustness/equilibrium_uniqueness.py
-run robustness/counterfactual_rationality.py
+run robustness/phi_sweep_calibration.py
 run robustness/spec_robustness.py
+run robustness/discount_ordering_robustness.py
+run robustness/cascade_robustness.py
 
 echo ""
 echo "══════════════════════════════════════════"
