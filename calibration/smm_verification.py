@@ -165,78 +165,90 @@ print(f"\n  Overall : {'ALL RANKINGS PRESERVED' if all_ok else 'ONE OR MORE RANK
 print(f"\nDone.")
 
 # ══════════════════════════════════════════════════════════════════
-# CHECK 4 — PARAMETER ELASTICITY (STABILITY TEST)
+# JACOBIAN — computed once, used by both Check 4 and Check 5.
+# Central differences at THETA_BEST for better accuracy than forward.
 # ══════════════════════════════════════════════════════════════════
-print(f"\n{SEP}\n  CHECK 4 — PARAMETER ELASTICITY (±10% STABILITY TEST)\n{SEP}")
-EPSILON_PERTURB = 0.05
-print(f"  Perturbing all target moments by ±{EPSILON_PERTURB*100:.0f}%...", flush=True)
-
-def stressed_objective(theta, raw, weights, targets):
-    from smm_calibration import BOUNDS, MOMENT_WEIGHTS
-    for v, (lo, hi) in zip(theta, BOUNDS):
-        if not (lo < v < hi): return 1e6
-    m_model = compute_moments(theta, raw, weights, n_mc=250)
-    diff = targets - m_model
-    return float(MOMENT_WEIGHTS @ (diff ** 2))
-
-stressed_pos = MOMENTS_DATA * (1 + EPSILON_PERTURB)
-stressed_neg = MOMENTS_DATA * (1 - EPSILON_PERTURB)
-
-print(f"  Running +{EPSILON_PERTURB*100:.0f}% optimisation...", flush=True)
-res_pos = minimize(stressed_objective, THETA_BEST,
-                   args=(raw, weights, stressed_pos),
-                   method="Nelder-Mead", options=NM_OPTIONS)
-
-print(f"  Running -{EPSILON_PERTURB*100:.0f}% optimisation...", flush=True)
-res_neg = minimize(stressed_objective, THETA_BEST,
-                   args=(raw, weights, stressed_neg),
-                   method="Nelder-Mead", options=NM_OPTIONS)
-
-pos_label = f"+{EPSILON_PERTURB*100:.0f}%"
-neg_label = f"-{EPSILON_PERTURB*100:.0f}%"
-print(f"\n  {'Param':<8} {'Baseline':>10} {pos_label:>10} {neg_label:>10} {'Mean |Elast|':>14}")
-print(f"  {'-'*58}")
-
-mean_elasticities = []
-for name, base, pos_val, neg_val in zip(PARAM_NAMES, THETA_BEST, res_pos.x, res_neg.x):
-    el_pos = abs((pos_val - base) / base) / EPSILON_PERTURB
-    el_neg = abs((neg_val - base) / base) / EPSILON_PERTURB
-    mean_el = (el_pos + el_neg) / 2
-    mean_elasticities.append(mean_el)
-    print(f"  {name:<8} {base:>10.4f} {pos_val:>10.4f} {neg_val:>10.4f} {mean_el:>14.4f}")
-
-overall_mean = np.mean(mean_elasticities)
-verdict = "PASS" if overall_mean < 2.0 else "FAIL"
-print(f"\n  Mean |Elasticity| : {overall_mean:.4f}  (Target < 2.0) — {verdict}")
+print(f"\n  Computing moment Jacobian G = ∂m/∂θ (central differences)...", flush=True)
+h = 1e-3
+n_p = len(THETA_BEST)
+n_m = len(MOMENTS_DATA)
+G = np.zeros((n_m, n_p))
+for j in range(n_p):
+    tp = np.array(THETA_BEST, dtype=float); tp[j] += h
+    tn = np.array(THETA_BEST, dtype=float); tn[j] -= h
+    m_up = compute_moments(tp, raw, weights)
+    m_dn = compute_moments(tn, raw, weights)
+    G[:, j] = (m_up - m_dn) / (2 * h)
 
 # ══════════════════════════════════════════════════════════════════
-# CHECK 5 — JACOBIAN IDENTIFICATION (THE PRO MOVE)
-# Calculates local sensitivity of moments to parameters.
+# CHECK 4 — MOMENT SENSITIVITY (ANDREWS–GENTZKOW–SHAPIRO)
+# Andrews, Gentzkow, Shapiro (AER 2017) derive a closed-form
+# sensitivity matrix Λ = (G'WG)^{-1} G'W that approximates
+#     Δθ ≈ Λ Δm
+# without re-optimising under perturbed targets. Dividing by
+# baseline scales gives dimensionless elasticities
+#     E_{jk} = Λ_{jk} · m_k / θ_j
+# which are the fractional change in parameter j per fractional
+# change in moment k. This sidesteps the scale-blindness and
+# multi-basin artefacts of uniform %-scaling re-estimation tests.
+# ══════════════════════════════════════════════════════════════════
+print(f"\n{SEP}\n  CHECK 4 — MOMENT SENSITIVITY (Andrews–Gentzkow–Shapiro)\n{SEP}")
+
+W = np.diag(MOMENT_WEIGHTS)
+try:
+    Lam = np.linalg.solve(G.T @ W @ G, G.T @ W)   # Λ = (G'WG)^{-1} G'W
+except np.linalg.LinAlgError:
+    Lam = None
+
+if Lam is None:
+    print("  G'WG is singular — parameters not locally identified.")
+else:
+    m_vec = np.asarray(MOMENTS_DATA, dtype=float)
+    t_vec = np.asarray(THETA_BEST,  dtype=float)
+    E = (Lam * m_vec) / t_vec[:, None]            # E[j,k] = Λ_{jk} m_k / θ_j
+
+    mom_short = [(n[:12] + "…") if len(n) > 12 else n for n in MOMENT_NAMES]
+    col_w = 12
+    hdr = f"  {'Param':<10} " + " ".join(f"{m:>{col_w}}" for m in mom_short)
+    print("\n  Elasticity matrix  (Δθ/θ per 1% Δm, via AGS Λ)")
+    print(hdr)
+    print("  " + "-" * (len(hdr) - 2))
+    for j, name in enumerate(PARAM_NAMES):
+        cells = " ".join(f"{E[j, k]:>{col_w}.4f}" for k in range(n_m))
+        print(f"  {name:<10} {cells}")
+
+    abs_E = np.abs(E)
+    max_abs = float(abs_E.max())
+    j_max, k_max = np.unravel_index(np.argmax(abs_E), E.shape)
+    row_l1 = abs_E.sum(axis=1)
+    print("  " + "-" * (len(hdr) - 2))
+    print(f"\n  Row Σ|E| (total moment leverage on each parameter):")
+    for j, name in enumerate(PARAM_NAMES):
+        print(f"    {name:<10} {row_l1[j]:.4f}")
+
+    verdict = "PASS" if max_abs < 2.0 else "CAUTION"
+    print(f"\n  Max |elasticity|      : {max_abs:.4f}")
+    print(f"  Most sensitive pair   : {PARAM_NAMES[j_max]} ← {MOMENT_NAMES[k_max]}")
+    print(f"  Target                : max |E| < 2.0 — {verdict}")
+    print("  Interpretation: a 1% shift in m_k induces ~|E_{jk}|% shift in θ_j,")
+    print("                  to first order and holding all other moments fixed.")
+
+# ══════════════════════════════════════════════════════════════════
+# CHECK 5 — JACOBIAN IDENTIFICATION MATRIX
+# Reuses G from above. Raw moment sensitivities + condition number
+# of J provide a second, complementary view of local identification.
 # ══════════════════════════════════════════════════════════════════
 print(f"\n{SEP}\n  CHECK 5 — JACOBIAN IDENTIFICATION MATRIX\n{SEP}")
-print("  Calculating numerical derivatives (Finite Differences)...", flush=True)
-
-h = 1e-3 # Step size for derivative
-J = np.zeros((len(MOMENTS_DATA), len(THETA_BEST)))
-m0 = compute_moments(THETA_BEST, raw, weights, n_mc=500)
-
-for j in range(len(THETA_BEST)):
-    theta_plus = np.copy(THETA_BEST)
-    theta_plus[j] += h
-    m_plus = compute_moments(theta_plus, raw, weights, n_mc=500)
-    J[:, j] = (m_plus - m0) / h
-
-print(f"\n  Sensitivity Matrix (d_Moment / d_Param):")
+print("\n  Sensitivity Matrix (∂ moment / ∂ param):")
 header = " " * 32 + "  ".join(f"{p:>8}" for p in PARAM_NAMES)
 print(header)
 print("-" * len(header))
-
 for i, m_name in enumerate(MOMENT_NAMES):
-    row_vals = "  ".join(f"{J[i, j]:>8.3f}" for j in range(len(THETA_BEST)))
+    row_vals = "  ".join(f"{G[i, j]:>8.3f}" for j in range(n_p))
     short_name = (m_name[:30] + '..') if len(m_name) > 30 else m_name.ljust(32)
     print(f"  {short_name} {row_vals}")
 
-cond_num = np.linalg.cond(J)
+cond_num = np.linalg.cond(G)
 print(f"\n  Jacobian Condition Number: {cond_num:.2f}")
 print(f"  Verdict : {'WELL-IDENTIFIED' if cond_num < 500 else 'WEAKLY IDENTIFIED (Check for collinearity)'}")
 
