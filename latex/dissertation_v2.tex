@@ -1,5 +1,5 @@
 % ============================================================
-%  The Climate Standoff — Dissertation
+%  The Climate Standoff: Dissertation
 %  Compile: pdflatex dissertation.tex  (run twice for refs)
 %  Assets resolved via \graphicspath from latex/ directory
 % ============================================================
@@ -71,7 +71,7 @@ This paper develops a finite-horizon dynamic Markov game of global climate coord
 
 Calibration proceeds in two stages. Cross-bloc differences in transition costs, climate damages, trade exposure, economic weight, and planning horizons are built directly from World Bank macroeconomic, emissions, and sovereign borrowing data, pinning down how the blocs are positioned relative to each other. The remaining free parameters, which govern how heavily governments weigh upfront costs, future climate damages, the collective payoff from coordination, and the strength with which early adoption pulls later movers in, are recovered by matching the model through simulated method of moments (SMM) to a small set of stylised benchmarks representative of the 2025 climate-policy environment. The fitted baseline is stress-tested through one-at-a-time parameter sweeps and a 1{,}000-draw global sensitivity analysis.
 
-The analysis identifies a sharp ordering among policy channels. Joint planning-horizon improvements in the United States and China are the most efficient single lever: extending both pivotal blocs' horizons together is the only single-instrument intervention that reliably tips a genuinely uncertain baseline into reliable coordination. A robustness exercise across alternative discount-factor orderings, including a US--China flip (Appendix~D), shows this is not US-specific; whichever pivotal bloc starts at the shorter horizon acts as the binding constraint, and joint movement is invariant to which is currently lagging. Reducing transition costs, especially in China, forms a robust second tier and operates as an independent bottleneck that patience alone does not resolve. Learning rates and damage-urgency mechanisms act as amplifiers rather than primary levers.
+The analysis identifies a sharp ordering among policy channels. At the calibrated baseline, coordination succeeds in roughly three quarters of simulated runs: rational players facing a closing window mostly swerve before collective failure becomes irreversible. The remaining quarter is a structural tail risk, not random noise, but cases in which strategic timing failures compound before the spillover channel builds enough momentum to tip the system. The policy question is therefore which levers compress that tail most efficiently. Joint planning-horizon improvements in the United States and China are the answer: extending both pivotal blocs' horizons together is the single instrument that most efficiently shifts the failure probability from one-in-four toward a rare event. A robustness exercise across alternative discount-factor orderings, including a US/China flip (Appendix~D), shows this is not US-specific; whichever pivotal bloc starts at the shorter horizon acts as the binding constraint, and joint movement is invariant to which is currently lagging. Reducing transition costs, especially in China, forms a robust second tier and operates as an independent bottleneck that patience alone does not resolve. Learning rates and damage-urgency mechanisms act as amplifiers rather than primary levers.
 
 \vfill
 \noindent\textbf{Author:} David Clements\\
@@ -193,7 +193,7 @@ Two gaps run through the literature reviewed above. The first is structural. No 
 endogenises the three forces the empirical record suggests are co-moving: declining transition costs as the
 coalition grows, escalating political pressure on holdouts as the coalition grows around them, and the
 asymmetric influence of pivotal blocs whose individual moves shift others' incentives. Coalition models such as
-Barrett (1994) and Nordhaus (2015) characterise the participation set at a static club equilibrium---Nordhaus
+Barrett (1994) and Nordhaus (2015) characterise the participation set at a static club equilibrium; Nordhaus
 endogenises the environment through trade penalties on non-members, but the equilibrium is still a
 single-shot membership determination rather than a trajectory through time.
 Diffusion models such as Grubb et al.\ (2021) capture aggregate cost trajectories but not the strategic
@@ -433,7 +433,7 @@ frictionless optimiser. A bloc can have a long planning horizon but high politic
 (low $\delta$, high $\lambda$). The two parameters do different things and are identified
 through different variation in the analysis.
 
-\bpar{Cost--Pressure Identification and the Composite Spillover Channel:}
+\bpar{Cost/Pressure Identification and the Composite Spillover Channel:}
 The transition-cost and political-pressure mechanisms are conceptually distinct economic
 channels but both intensify with the same state variable $W_t$: falling costs pull potential
 adopters in, rising pressure pushes holdouts in, and an acceleration along any equilibrium
@@ -560,7 +560,7 @@ Implementing the model requires assigning numerical values to all parameters. So
 directly by observable data. Others cannot. The calibration strategy addresses this by separating the
 problem into two layers, each with a distinct identification logic.
 
-The first layer fixes ordinal structure: the relative positioning of blocs within each parameter channel. Cross-bloc rankings in transition costs, climate damages, and systemic influence can be inferred from data. The EU's position is identified from carbon intensity, trade openness, and deployment history; the SMM moments then target the magnitude of the EU--peer gap, not its existence. World Bank (2026) development indicators, national emissions inventories, and bilateral trade statistics provide the evidence base. This layer is held fixed throughout: perturbing it would mean contradicting the observable record.
+The first layer fixes ordinal structure: the relative positioning of blocs within each parameter channel. Cross-bloc rankings in transition costs, climate damages, and systemic influence can be inferred from data. The EU's position is identified from carbon intensity, trade openness, and deployment history; the SMM moments then target the magnitude of the EU to peer gap, not its existence. World Bank (2026) development indicators, national emissions inventories, and bilateral trade statistics provide the evidence base. This layer is held fixed throughout: perturbing it would mean contradicting the observable record.
 
 The second layer recovers cardinal scaling: the relative importance governments place on transition costs, adoption spillovers, climate damages, and coordination benefits is not observable from macroeconomic data (Nordhaus, 2007) and is estimated using simulated method of moments (McFadden, 1989).
 
@@ -570,7 +570,7 @@ Ordinal structure is data-identified. Cardinal scaling is structurally estimated
 \needspace{12em}
 \subsubsection{Layer 1: Ordinal Structure}
 
-Each per-player parameter is constructed from bloc-level World Bank (2026) data through a structural transformation anchored to the EU as the reference bloc, so that a single scaling $\alpha$ sets the EU's level and the other blocs follow data-implied ratios. The EU is used as the numeraire because its long continuous record of climate legislation and ETS operation makes its bloc-level values the best-anchored data point; this is a normalisation convention only, and the EU--US gap that appears later as a calibration moment is a moment about magnitude rather than about which bloc is the anchor, so no circularity is introduced.
+Each per-player parameter is constructed from bloc-level World Bank (2026) data through a structural transformation anchored to the EU as the reference bloc, so that a single scaling $\alpha$ sets the EU's level and the other blocs follow data-implied ratios. The EU is used as the numeraire because its long continuous record of climate legislation and ETS operation makes its bloc-level values the best-anchored data point; this is a normalisation convention only, and the EU/US gap that appears later as a calibration moment is a moment about magnitude rather than about which bloc is the anchor, so no circularity is introduced.
 
 \bpar{Transition costs} are derived from the carbon intensity of GDP, adjusted for development. Raw intensity is misleading for less developed economies, where low values often reflect limited industrialisation rather than clean infrastructure. A development-gated interpolation blends each bloc's observed intensity with a global baseline, weighted by GDP per capita relative to the richest bloc. An affordability penalty is then applied (elasticity $\epsilon = 0.3$) to capture the higher cost of capital for renewable deployment in developing economies (Ameli et al., 2021). Together these adjustments ensure the ordinal cost structure reflects genuine transition burdens.
 
@@ -602,7 +602,7 @@ vulnerability, a central structural tension of the model.
 
 These values are reasoned from observable institutional features rather than estimated, so the
 specific ordering is itself a narrative choice. Appendix~D reports how the headline patience result
-behaves under five alternative orderings, including a US--CN flip and a fully equalised vector.
+behaves under five alternative orderings, including a US/CN flip and a fully equalised vector.
 
 \begin{table}[htbp]
 \centering
@@ -648,13 +648,13 @@ a $\pm 0.2$ band around $\theta$. It is treated as an experimental lever.
 The precision parameter $\lambda$ governs how sharply each bloc's strategy responds to payoff differences. Experimental estimates typically range from 0.5 to 10 depending on context (McKelvey and Palfrey, 1995; Goeree, Holt, and Palfrey, 2003). The baseline sets $\lambda = 1.5$ as a common global benchmark, reflecting the persistent noise in international climate negotiations from domestic political constraints, electoral volatility, and bureaucratic friction. Bloc-specific values are introduced as experimental levers in the analysis to capture institutional heterogeneity that a single global parameter cannot.
 
 \bpar{Technology Learning Rate:}
-The learning rate ($\gamma = 0.25$) captures cost reductions driven by cumulative adoption through technology spillovers, supply chain development, and learning-by-doing. Empirical estimates suggest declines of 20--25\% per doubling of capacity for solar PV and 10--15\% for wind (Rubin et al., 2015; IRENA, 2023); the chosen value aligns with the upper end of these estimates, reflecting that ``adoption'' here represents a broad technological transition rather than a single technology.
+The learning rate ($\gamma = 0.25$) captures cost reductions driven by cumulative adoption through technology spillovers, supply chain development, and learning-by-doing. Empirical estimates suggest declines of 20\% to 25\% per doubling of capacity for solar PV and 10\% to 15\% for wind (Rubin et al., 2015; IRENA, 2023); the chosen value aligns with the upper end of these estimates, reflecting that ``adoption'' here represents a broad technological transition rather than a single technology.
 
 \bpar{Damage Escalation:}
 The damage escalation rate ($\kappa = 0.05$) governs how climate damages compound under delayed action.
 Over the model's 50-year horizon, this implies an increase of roughly 50\% in baseline damages under
 persistent non-cooperation. This magnitude is consistent with IPCC AR6 estimates suggesting losses on
-the order of 1--2\% of GDP per decade of delayed mitigation.
+the order of 1\% to 2\% of GDP per decade of delayed mitigation.
 
 % ---- 4.2 Layer 2: SMM ----------------------------------------
 \needspace{12em}
@@ -680,7 +680,7 @@ activated), which discipline the baseline cost, damage, and benefit weights; and
 the spillover channel.
 
 \begin{itemize}[leftmargin=2em]
-  \item \textbf{M1: EU--US adoption gap, period one} (benchmark: 0.25). Anchors the relative cost channel: the EU has led clean-energy transition over the past two decades while the US has not matched its pace despite comparable economic scale; 0.25 encodes that gap as a stylised difference in adoption propensity (Wurzel et al., 2019; Falkner, 2016).
+  \item \textbf{M1: EU versus US adoption gap, period one} (benchmark: 0.25). Anchors the relative cost channel: the EU has led clean-energy transition over the past two decades while the US has not matched its pace despite comparable economic scale; 0.25 encodes that gap as a stylised difference in adoption propensity (Wurzel et al., 2019; Falkner, 2016).
 
   \item \textbf{M2: US period-one adoption probability} (benchmark: 0.10). With M1, pins down the absolute level of baseline costs, ruling out parameterisations where both blocs adopt readily and the gap is generated by small differences (World Bank, 2026).
 
@@ -690,7 +690,7 @@ the spillover channel.
 
   \item \textbf{M5: US expected period-two adoption probability} (benchmark: 0.15). A second restriction on the spillover channel from the US perspective, encoding modest period-two acceleration as the international coalition begins to form.
 
-  \item \textbf{M6: Mean coordination timing conditional on success} (benchmark: 5.0 periods, roughly 2045--2050). Aggregate timing anchor, consistent with IEA (2021) and IPCC 1.5\textdegree C scenarios identifying mid-century as the realistic coordination window.
+  \item \textbf{M6: Mean coordination timing conditional on success} (benchmark: 5.0 periods, roughly 2045 to 2050). Aggregate timing anchor, consistent with IEA (2021) and IPCC 1.5\textdegree C scenarios identifying mid-century as the realistic coordination window.
 \end{itemize}
 
 The ordinal hierarchy of policy levers reported in Section~6 is robust to reasonable variation in these benchmark values: a result that shifted with small changes would be a feature of the particular numbers chosen rather than the strategic structure of the coordination problem.
@@ -714,7 +714,7 @@ Six moments and four parameters make the system over-identified by two restricti
 \needspace{12em}
 \subsubsection{Verification and Stability}
 
-Five verification checks are applied. (1)~Restarting the optimiser from the estimated solution produces zero parameter drift, confirming a genuine local minimum. (2)~Rerunning across five random seeds yields coordination success rates with standard deviation below 0.02. (3)~All five empirically-grounded ordinal rankings across blocs are preserved exactly. (4)~The Andrews--Gentzkow--Shapiro sensitivity matrix $\Lambda = -(G'WG)^{-1}G'W$ is computed via central-difference Jacobian, where $G = \partial m / \partial \theta$ and $W$ is the SMM weight matrix. Each entry $\Lambda_{jk}$ gives the percentage change in $\hat{\theta}_j$ per one-percent change in target moment $m_k$, holding all other moments fixed. The largest elasticity is $12.93$ for $\alpha_{\text{spill}}$ with respect to M6 (mean coordination timing). This reflects a structural feature of the model rather than fragility: $\alpha_{\text{spill}}$ governs how incentives compound as the coalition grows over time, and M6 is the moment that records when that accumulation ends in success. Shifting the timing target therefore mechanically re-scales how large the spillover must be to produce the same outcome, generating a large local elasticity by construction. All other elasticities are below $2.5$, and the remaining parameters show no evidence of fragility (Andrews, Gentzkow and Shapiro, 2017). (5)~The Jacobian condition number measures whether the moments are providing genuinely independent information about different parameters, rather than all pointing in the same direction. A value of $202$ confirms the moments are doing this: the period-one moments pin down $\alpha_c$, $\alpha_d$, and $\alpha_b$ while the period-two acceleration moments identify $\alpha_{\text{spill}}$ separately (Hansen, 1982; Belsley et al., 1980).
+Five verification checks are applied. (1)~Restarting the optimiser from the estimated solution produces zero parameter drift, confirming a genuine local minimum. (2)~Rerunning across five random seeds yields coordination success rates with standard deviation below 0.02. (3)~All five empirically-grounded ordinal rankings across blocs are preserved exactly. (4)~The Andrews, Gentzkow and Shapiro sensitivity matrix $\Lambda = -(G'WG)^{-1}G'W$ is computed via central-difference Jacobian, where $G = \partial m / \partial \theta$ and $W$ is the SMM weight matrix. Each entry $\Lambda_{jk}$ gives the percentage change in $\hat{\theta}_j$ per one-percent change in target moment $m_k$, holding all other moments fixed. The largest elasticity is $12.93$ for $\alpha_{\text{spill}}$ with respect to M6 (mean coordination timing). This reflects a structural feature of the model rather than fragility: $\alpha_{\text{spill}}$ governs how incentives compound as the coalition grows over time, and M6 is the moment that records when that accumulation ends in success. Shifting the timing target therefore mechanically re-scales how large the spillover must be to produce the same outcome, generating a large local elasticity by construction. All other elasticities are below $2.5$, and the remaining parameters show no evidence of fragility (Andrews, Gentzkow and Shapiro, 2017). (5)~The Jacobian condition number measures whether the moments are providing genuinely independent information about different parameters, rather than all pointing in the same direction. A value of $202$ confirms the moments are doing this: the period-one moments pin down $\alpha_c$, $\alpha_d$, and $\alpha_b$ while the period-two acceleration moments identify $\alpha_{\text{spill}}$ separately (Hansen, 1982; Belsley et al., 1980).
 
 \begin{table}[htbp]
 \centering
@@ -770,11 +770,11 @@ The relationship between each input and each outcome is measured by Spearman ran
 \needspace{12em}
 \subsection{Model Baselines}
 
-Under the fitted strategic environment, coordination is genuinely uncertain: it succeeds in 50.4\% of simulated paths, with a mean coordination timing of 3.42 periods conditional on success and a mean final coalition weight of 0.52. There is a real risk that cooperation fails. The EU moves first at 29.7\%, China at 9.7\%, the US at 7.1\%, and RoW is near-inactive at 0\%. Adoption probabilities decline sharply after period two as the window for successful coordination narrows.
+Under the fitted strategic environment, coordination succeeds in 75.3\% of simulated paths: rational players largely swerve before the window closes. The mean coordination timing conditional on success is 3.94 periods and the mean final coalition weight is 0.77. The one-in-four failure tail is the structural risk the analysis seeks to compress. The EU moves first at 26.8\%, China at 12.1\%, the US at 6.5\%, and RoW is near-inactive at 0.1\%. Adoption probabilities decline sharply after period two as the window for successful coordination narrows.
 
-The EU's period-one probability of 31.3\% reflects two decades of continuous climate legislation, a legally binding net-zero commitment, and the Carbon Border Adjustment Mechanism. China's 9.5\% period-one probability reflects the spillover channel operating through both cost-learning and political pressure at $\phi = 0.5$: large enough that China is a plausible early follower, small enough that the structural cost disadvantage still dominates in expectation.
+The EU's period-one probability of 28.5\% reflects two decades of continuous climate legislation, a legally binding net-zero commitment, and the Carbon Border Adjustment Mechanism. China's 12.8\% period-one probability reflects the spillover channel operating through both cost-learning and political pressure at $\phi = 0.5$: large enough that China is a plausible early follower, small enough that the structural cost disadvantage still dominates in expectation.
 
-A genuinely uncertain baseline is not a tail risk to be compressed but a real possibility of cooperation failure, and the analytical question reframes accordingly. The marginal sweeps and GSA identify which levers can shift the fitted world decisively into the success region, separating instruments capable of moving a genuinely uncertain outcome toward reliable coordination from those that leave the underlying fragility intact.
+The baseline is not a coin-flip. At calibrated parameters, coordination succeeds in roughly three quarters of simulated runs: rational players, facing a window that closes, largely swerve before collective failure becomes irreversible. The one-in-four failure tail is the structural risk: the share of strategic environments in which timing failures compound before the spillover channel accumulates enough momentum to tip the system. The analytical question is therefore not whether coordination is possible but which levers compress that tail most efficiently, pushing failure from a one-in-four event toward a rare outcome. The marginal sweeps and GSA identify that hierarchy: separating instruments that materially reduce the failure probability from those that leave the underlying tail risk intact.
 
 \begin{figure}[htbp]
   \centering
@@ -794,16 +794,15 @@ A genuinely uncertain baseline is not a tail risk to be compressed but a real po
 The precise numerical thresholds reported below are specific to the fitted baseline calibration. The
 robust policy implication is the ordinal hierarchy, not the exact percentages.
 
-The hierarchy is sharp. A small number of channels can move the genuinely uncertain baseline toward
-reliable coordination. Most cannot.
+The hierarchy is sharp. A small number of channels compress the one-in-four failure tail efficiently. Most cannot.
 
-Within this calibration the joint US--China patience channel is the most efficient single lever in the model. Improving both blocs' planning horizons by just $+6.75\%$ simultaneously jumps the system across both the 90\% and 95\% coordination frontiers at the same point. The coordination threshold $\theta$ matches this efficiency, needing only a $-22.16\%$ reduction to reach 90\%.
+Within this calibration the joint US/China patience channel is the most efficient single lever in the model. Improving both blocs' planning horizons by just $+6.75\%$ simultaneously jumps the system across both the 90\% and 95\% coordination frontiers at the same point. The coordination threshold $\theta$ is the next most efficient structural lever, needing only a $-27.3\%$ reduction to reach 90\% and $-37.5\%$ for 95\%.
 
-Individual patience channels reach the 90\% frontier at modest levels in this calibration: $\delta_{US}$ needs $+10.3\%$ for 90\% and $+15.8\%$ for 95\%, while $\delta_{CN}$ crosses both frontiers simultaneously at $+8.5\%$. $\delta_{RoW}$ and $\delta_{EU}$ are absent from both frontiers, consistent with the EU moving first because of its ordinal cost position rather than marginal patience sensitivity. Appendix~D shows that the relative magnitudes of these individual sweeps are calibration-specific: when the US--China discount ordering is flipped, $\delta_{US}$ and $\delta_{CN}$ swap places as the cheapest individual lever. The joint US--China sweep, by contrast, crosses at the same $+5.2\%$ in either ordering. Across the perturbations tested, the binding individual constraint is whichever pivotal bloc has the lower starting discount, and the joint channel removes this dependency by moving both at once. The pattern suggests, rather than proves, a more general principle: joint commitment across both pivotal players is more robust than relying on whichever one happens to be currently lagging.
+Individual patience channels reach the 90\% frontier at modest levels in this calibration: $\delta_{US}$ needs $+10.3\%$ for 90\% and $+15.8\%$ for 95\%, while $\delta_{CN}$ crosses both frontiers simultaneously at $+8.5\%$. $\delta_{RoW}$ and $\delta_{EU}$ are absent from both frontiers, consistent with the EU moving first because of its ordinal cost position rather than marginal patience sensitivity. Appendix~D shows that the relative magnitudes of these individual sweeps are calibration-specific: when the US/China discount ordering is flipped, $\delta_{US}$ and $\delta_{CN}$ swap places as the cheapest individual lever. The joint US/China sweep, by contrast, crosses at the same $+5.2\%$ in either ordering. Across the perturbations tested, the binding individual constraint is whichever pivotal bloc has the lower starting discount, and the joint channel removes this dependency by moving both at once. The pattern suggests, rather than proves, a more general principle: joint commitment across both pivotal players is more robust than relying on whichever one happens to be currently lagging.
 
-Transition costs form a clear second tier. Global cost reduction crosses both frontiers simultaneously at $-15.45\%$. Bloc-specific reductions require larger movements: US costs need $-37.3\%$, CN costs $-26.4\%$ for 90\% and $-48.2\%$ for 95\%, RoW costs $-52.7\%$ for 90\%.
+Transition costs form a clear second tier. Global cost reduction reaches 90\% at $-6.4\%$ and 95\% at $-15.5\%$. Bloc-specific reductions require larger movements: CN costs need $-15.5\%$ for 90\% and $-26.4\%$ for 95\%; US costs need $-26.4\%$ for 90\% and $-37.3\%$ for 95\%; RoW costs need $-43.6\%$ for 90\% and $-52.7\%$ for 95\%.
 
-Everything else falls well short. Pressure channels require extreme deviations: US pressure needs $+127\%$ for 90\% and $+231\%$ for 95\%; CN pressure never crosses either frontier. Global pressure crosses 90\% at $+58.2\%$. The learning rate $\gamma$, sigmoid steepness $\eta$, and all $\lambda$ channels except $\lambda_{US}$ are absent from the 90\% frontier entirely. $\lambda_{US}$ needs $+213\%$ for 90\%. $\kappa$ (damage escalation) needs $+127\%$ for 90\%.
+Everything else falls well short. Pressure channels require large deviations: US pressure needs $+58.2\%$ for 90\% and $+161.8\%$ for 95\%; CN pressure never crosses either frontier. Global pressure crosses 90\% at $+58.2\%$ and 95\% at $+92.7\%$. $\kappa$ (damage escalation) needs $+58.2\%$ for 90\% and $+92.8\%$ for 95\%. The learning rate $\gamma$, sigmoid steepness $\eta$, and all $\lambda$ channels except $\lambda_{US}$ are absent from the 90\% frontier entirely. $\lambda_{US}$ needs $+213\%$ for 90\%.
 
 \begin{figure}[htbp]
   \centering
@@ -823,15 +822,15 @@ Everything else falls well short. Pressure channels require extreme deviations: 
 \needspace{12em}
 \subsection{GSA Findings}
 
-Where the marginal sweeps identify which levers tip coordination in isolation, the GSA tests whether the rankings survive once the entire strategic environment moves simultaneously. They do, with one notable addition: the spillover composition parameter $\phi$, which was held fixed at 0.5 during calibration precisely because no adoption-trajectory moment could identify it, shows a strong directional effect on outcomes when allowed to vary. A parameter that cannot be pinned down by the moments is not the same as a parameter that does not matter for the outcome, and $\phi$ is the clearest example in the analysis.
+Where the marginal sweeps identify which levers tip coordination in isolation, the GSA tests whether the rankings survive once the entire strategic environment moves simultaneously. They do, with one headline result: the spillover composition parameter $\phi$, which was held fixed at 0.5 during calibration precisely because no adoption-trajectory moment could identify it, is the single strongest correlate of coordination outcomes when allowed to vary. A parameter that cannot be pinned down by the moments is not the same as a parameter that does not matter for the outcome, and $\phi$ is the clearest example in the analysis.
 
-$\phi$ is positively correlated with coordination success ($\rho = +0.308$, $p < 0.001$) and accelerates timing ($\rho = -0.285$), placing it among the largest correlations in the GSA. The directional reading is that pressure-dominant environments inside the spillover channel coordinate more reliably and earlier than cost-learning-dominant environments. The magnitude of this effect should be interpreted with care: $\phi$ is held fixed at 0.5 in the SMM-calibrated baseline because the moments cannot identify it, and the GSA varies it independently across $[0, 1]$ rather than within a tight empirical range. The result is therefore best read as a directional finding about the sign of the carrot-versus-stick effect rather than a precise quantitative claim about how much of the spillover channel's leverage operates through pressure. Appendix~B confirms that the SMM-recovered cardinal weights are stable in the pressure-inclusive region $\phi \in [0.5, 1.0]$, so the policy hierarchy reported here does not depend on the particular $\phi$ value chosen for the baseline.
+$\phi$ is the top positive correlate of coordination success ($\rho = +0.376$, $p < 0.001$) and the top accelerator of timing ($\rho = -0.411$, $p < 0.001$), outranking every other parameter on both dimensions. The directional reading is that pressure-dominant environments inside the spillover channel coordinate more reliably and earlier than cost-learning-dominant environments. The magnitude of this effect should be interpreted with care: $\phi$ is held fixed at 0.5 in the SMM-calibrated baseline because the moments cannot identify it, and the GSA varies it independently across $[0, 1]$ rather than within a tight empirical range. The result is therefore best read as a directional finding about the sign of the carrot-versus-stick effect rather than a precise quantitative claim. Appendix~B confirms that the SMM-recovered cardinal weights are stable in the pressure-inclusive region $\phi \in [0.5, 1.0]$, so the policy hierarchy reported here does not depend on the particular $\phi$ value chosen for the baseline.
 
-Costs and patience form the next tier. Cost$_{US}$ ($\rho = -0.305$), Cost$_{CN}$ ($\rho = -0.280$), $\theta$ ($\rho = -0.244$), and Cost$_{RoW}$ ($\rho = -0.177$) lead the negative correlates of success. $\delta_{CN}$ ($\rho = +0.248$) and $\delta_{US}$ ($\rho = +0.236$) lead the positive side and lead timing acceleration ($\rho = -0.310$ and $-0.255$ respectively). The two pivotal-mover discount factors are roughly co-dominant in this calibration; Appendix~D suggests that which of them ranks first depends on which starts at the lower value and is therefore the binding constraint, rather than on anything specific to the United States or China. $\kappa$ (damage escalation) emerges as a first-order positive driver ($\rho = +0.264$), operating through interaction effects rather than direct compression: it amplifies patience and cost channels once the strategic environment is already shifting. Cost$_{CN}$ exhibits the strongest negative correlation with China's first-mover probability of any parameter ($\rho = -0.502$, $p < 0.001$), confirming transition costs as an independent bottleneck separate from the patience channel.
+Costs and patience form the next tier. Cost$_{CN}$ ($\rho = -0.301$) and Cost$_{US}$ ($\rho = -0.289$) lead the negative correlates of success, with $\theta$ ($\rho = -0.205$) and Cost$_{RoW}$ ($\rho = -0.145$) following. $\kappa$ (damage escalation) is the second-ranked positive driver of success ($\rho = +0.271$), operating through interaction effects rather than direct compression: it amplifies patience and cost channels once the strategic environment is already shifting. $\delta_{CN}$ ($\rho = +0.248$) and $\delta_{US}$ ($\rho = +0.169$) follow, with $\delta_{CN}$ also the dominant accelerator of timing ($\rho = -0.341$). Cost$_{CN}$ exhibits the strongest negative correlation with China's first-mover probability of any parameter ($\rho = -0.551$, $p < 0.001$), confirming transition costs as an independent bottleneck separate from the patience channel.
 
-$\lambda_{US}$ accelerates coordination timing ($\rho = -0.262$), $\lambda_{EU}$ does so somewhat less ($\rho = -0.193$), and $\lambda_{CN}$ more weakly still ($\rho = -0.107$). With near-equal US and China influence weights ($w_{US} = 0.299$, $w_{CN} = 0.308$), this asymmetry emerges from the strategic calculus rather than mechanical weight dominance. $\lambda_{CN}$ is also negatively correlated with China's own first-mover probability ($\rho = -0.239$): a more strategically precise China calculates more effectively that waiting dominates moving first, even as overall coordination still arrives slightly earlier. $\eta$ accelerates timing ($\rho = -0.140$) and increases success ($\rho = +0.196$): the more threshold-like the perceived benefits, the faster the system tips.
+$\lambda_{US}$ accelerates coordination timing ($\rho = -0.223$), $\lambda_{EU}$ does so somewhat less ($\rho = -0.128$), and $\lambda_{CN}$ similarly ($\rho = -0.122$). With near-equal US and China influence weights ($w_{US} = 0.299$, $w_{CN} = 0.308$), the US/EU asymmetry emerges from the strategic calculus rather than mechanical weight dominance. $\lambda_{CN}$ is also negatively correlated with China's own first-mover probability ($\rho = -0.159$): a more strategically precise China calculates more effectively that waiting dominates moving first, even as overall coordination still arrives slightly earlier. $\eta$ accelerates timing ($\rho = -0.100$) and increases success ($\rho = +0.150$): the more threshold-like the perceived benefits, the faster the system tips.
 
-Per-bloc pressure channels are materially stronger than in earlier specifications but stay below the primary levers: Pressure$_{US}$ ($\rho = +0.135$, $p < 0.001$) and Pressure$_{RoW}$ ($\rho = +0.136$) are significant, Pressure$_{CN}$ ($\rho = +0.090$) marginal, Pressure$_{EU}$ indistinguishable from zero. These operate inside the spillover at a given $\phi$ and are subsumed by the $\phi$ result above. Because $\phi$ and the bloc-specific pressure multipliers are drawn independently in the GSA, the $\phi$ correlation is not driven by pressure levels: the two effects are jointly identified and consistent with each other. $\delta_{EU}$ remains a marginal driver, confirming the EU moves first because of its ordinal position rather than its discount factor.
+Per-bloc pressure channels are significant but subsumed by $\phi$: Pressure$_{US}$ ($\rho = +0.163$) and Pressure$_{RoW}$ ($\rho = +0.147$) are significant positive correlates of success, Pressure$_{CN}$ ($\rho = +0.101$) marginally so, Pressure$_{EU}$ indistinguishable from zero. Because $\phi$ and the bloc-specific pressure multipliers are drawn independently in the GSA, the $\phi$ correlation is not driven by pressure levels: the two effects are jointly identified and consistent with each other. $\delta_{EU}$ and Cost$_{EU}$ are not statistically significant, confirming the EU moves first because of its ordinal position rather than its discount factor or cost level.
 
 \begin{figure}[htbp]
   \centering
@@ -857,9 +856,9 @@ Raising $\lambda_{US}$ (making the US more strategically precise) reduces its ow
 \input{../results/dissertation/table_lambda_spillover.tex}
 \FloatBarrier
 
-$\lambda_{US}$ is strongly negatively correlated with US first-mover probability ($\rho = -0.360$, $p < 0.001$) but is the strongest accelerator of coordination timing among all rationality parameters ($\rho = -0.262$). A more rational United States computes more accurately that moving first is strategically dominated, so it pulls back from period-1 adoption. But this patience is credible: other blocs respond by moving earlier themselves, anticipating that the US will commit once a sufficient coalition has formed. When $\lambda_{US}$ rises, China's first-mover probability rises significantly ($\rho = +0.078$, $p = 0.01$); the spillover onto EU first-mover probability is in the same direction but smaller and not statistically significant ($\rho = +0.047$, $p = 0.14$). The cascade onto China more than offsets the US's own pullback, and coordination arrives earlier overall.
+$\lambda_{US}$ is strongly negatively correlated with US first-mover probability ($\rho = -0.433$, $p < 0.001$) but is the strongest accelerator of coordination timing among all rationality parameters ($\rho = -0.223$). A more rational United States computes more accurately that moving first is strategically dominated, so it pulls back from period-1 adoption. But this patience is credible: other blocs respond by moving earlier themselves, anticipating that the US will commit once a sufficient coalition has formed. When $\lambda_{US}$ rises, China's first-mover probability rises significantly ($\rho = +0.126$, $p < 0.001$); the spillover onto EU first-mover probability is in the same direction but marginal ($\rho = +0.054$, $p = 0.09$). The cascade onto China more than offsets the US's own pullback, and coordination arrives earlier overall.
 
-The same mechanism does not operate through China. $\lambda_{CN}$ is also negatively correlated with its own first-mover probability ($\rho = -0.239$) and accelerates timing ($\rho = -0.107$), but cross-bloc spillovers are indistinguishable from zero: $\rho = +0.027$ ($p = 0.40$) onto the US and $\rho = +0.015$ ($p = 0.63$) onto the EU. China's timing acceleration is driven almost entirely by its own belief updating, not a credible-patience cascade.
+The same mechanism does not operate through China. $\lambda_{CN}$ is negatively correlated with its own first-mover probability ($\rho = -0.159$) and accelerates timing ($\rho = -0.122$), but cross-bloc spillovers are indistinguishable from zero: $\rho = +0.031$ ($p = 0.32$) onto the US and $\rho = +0.050$ ($p = 0.11$) onto the EU. China's timing acceleration is driven almost entirely by its own belief updating, not a credible-patience cascade.
 
 The equilibrium sweep confirms direction and scale. Raising $\lambda_{US}$ from 0.5 to 5.0 reduces US period-1 adoption by 20.7 percentage points while raising EU adoption by 57.0 points and Chinese adoption by 35.7 points. Raising $\lambda_{CN}$ over the same range reduces Chinese adoption by 24.6 points, raises the US by only 3.3, and reduces the EU by 9.9.
 
@@ -872,13 +871,13 @@ The asymmetry reflects position in the adoption sequence. The US is a pivotal se
 \needspace{12em}
 \section{Policy Implications}
 
-Climate coordination failure is better understood as a problem of strategic structure than as a shortage of green technology, insufficient carbon pricing, or inadequate diplomatic pressure. Under the fitted strategic environment, coordination is genuinely uncertain rather than a near-certain outcome: there is a real risk that cooperation fails, and that fragility concentrates along specific axes that receive relatively little attention in standard policy frameworks.
+Climate coordination failure is better understood as a problem of strategic structure than as a shortage of green technology, insufficient carbon pricing, or inadequate diplomatic pressure. Under the fitted strategic environment, coordination mostly succeeds: rational players facing a closing window largely swerve before collective failure becomes irreversible. But a one-in-four structural tail risk remains, and that tail is not random: it concentrates along specific axes that receive relatively little attention in standard policy frameworks. The policy question is not whether to make coordination possible but how to compress the failure tail efficiently.
 
 The implications below should be read as interpretations of mechanism rather than prescriptions of instrument. The model is a stylised QRE characterisation of a four-bloc coordination problem; the comparative statics in Section~5 identify which structural primitives carry the most leverage over outcomes within that representation. Mapping a model parameter to a real policy instrument is an interpretive step the model itself cannot perform: discount factors stand in for institutional credibility and effective political horizons, cost multipliers for the reach of subsidies and finance, pressure multipliers for trade conditionality and diplomatic exposure. The empirical content of the four axes lies in which mechanisms move the equilibrium; the policy categories are the natural reading of those mechanisms, not a claim that any particular instrument is calibrated against observed real-world effect sizes.
 
 \subsection{Axis 1: Bilateral credibility between the two pivotal movers}
 
-In the baseline calibration, the joint US--China patience channel is the single instrument that most efficiently shifts the genuinely uncertain baseline into reliable coordination, and the GSA places $\delta_{US}$ and $\delta_{CN}$ at the top of the positive correlates of coordination success. The robustness exercise in Appendix~D suggests this generalises beyond the specific calibration: across the configurations tested, whichever pivotal bloc starts at the lower effective planning horizon acts as the binding individual constraint, and the joint channel's 90\% crossing is invariant to which of the United States or China happens to be lagging at the time. The pattern points to a general principle, though one tested across only a handful of perturbations: joint commitment across both pivotal players appears more efficient than targeting whichever individual bloc is currently lagging. What the result captures is not simply time preference but whether the two pivotal players together assign sufficient weight to future payoffs to make early adoption worthwhile. Two pivotal players whose institutions credibly extend the decision horizon beyond the immediate electoral or fiscal cycle face a different strategic calculus from two players who do not.
+In the baseline calibration, the joint US/China patience channel is the single instrument that most efficiently compresses the coordination failure tail, and the GSA places $\delta_{US}$ and $\delta_{CN}$ at the top of the positive correlates of coordination success. The robustness exercise in Appendix~D suggests this generalises beyond the specific calibration: across the configurations tested, whichever pivotal bloc starts at the lower effective planning horizon acts as the binding individual constraint, and the joint channel's 90\% crossing is invariant to which of the United States or China happens to be lagging at the time. The pattern points to a general principle, though one tested across only a handful of perturbations: joint commitment across both pivotal players appears more efficient than targeting whichever individual bloc is currently lagging. What the result captures is not simply time preference but whether the two pivotal players together assign sufficient weight to future payoffs to make early adoption worthwhile. Two pivotal players whose institutions credibly extend the decision horizon beyond the immediate electoral or fiscal cycle face a different strategic calculus from two players who do not.
 The rationality asymmetry sharpens this further. The decomposition in Section~5.4 shows that
 higher $\lambda_{US}$ generates a significant positive spillover to Chinese first-mover probability
 ($\rho = +0.078$, $p = 0.01$), while higher $\lambda_{CN}$ generates no reciprocal effect on US behaviour
@@ -901,8 +900,8 @@ addressing transition costs is solving half the problem.
 \subsection{Axis 3: Perceived attainability of coordination}
 
 $\theta$ ranks consistently high across both analytical tests: in the marginal sweeps it is the most
-efficient single lever after the joint US--China patience channel, reaching the 90\% coordination
-frontier at a $-22.16\%$ shift, and in the GSA it sits in the top tier of negative correlates of
+efficient single lever after the joint US/China patience channel, reaching the 90\% coordination
+frontier at a $-27.3\%$ shift, and in the GSA it sits in the top tier of negative correlates of
 coordination success ($\rho = -0.244$), alongside the bloc-level cost channels. What $\theta$ captures
 is not a physical participation threshold but a strategic belief: whether blocs assign meaningful
 probability to coordination success given the current coalition state. In a threshold
@@ -937,8 +936,8 @@ data underlying this calibration cannot fully resolve.
 
 Damage urgency mechanisms and learning spillovers are best read as amplifiers rather than primary
 levers: they strengthen dynamics already moving but cannot initiate them. The sweep and GSA
-evidence is consistent with this reading --- neither channel reaches the 90\% frontier alone, and
-both correlate with outcomes more strongly when patience and cost channels are in motion --- though
+evidence is consistent with this reading: neither channel reaches the 90\% frontier alone, and
+both correlate with outcomes more strongly when patience and cost channels are in motion, though
 the analysis does not formally decompose main effects from interactions, so the distinction is an
 interpretation of the correlation pattern rather than a proven structural property. Interventions
 targeting credibility, attainability, and spillover composition are therefore likely a precondition
@@ -976,7 +975,7 @@ The model restricts each bloc to a binary adoption decision in each period. Real
 These scope conditions are real but bounded. The three primary findings, the joint patience lever,
 China's cost bottleneck, and the rationality asymmetry, survive the spillover composition sensitivity
 check in Appendix~B, hold across the perturbed cost and patience environments in Appendix~C, are not
-artefacts of the baseline discount ordering as confirmed in Appendix~D (including the US--CN flip),
+artefacts of the baseline discount ordering as confirmed in Appendix~D (including the US/CN flip),
 and sit on a calibrated parameter vector confirmed as a unique equilibrium in Appendix~A. The
 qualitative hierarchy is not sensitive to how the spillover composition is mixed, to perturbations
 of the calibrated cost and patience environment, or to which bloc is assigned the lowest starting
@@ -1033,21 +1032,21 @@ At each of nine grid points, the cost scaling parameter $\alpha_c$ is multiplied
 \input{../results/dissertation/table_lambda_us_cascade_robustness.tex}
 \FloatBarrier
 
-The cascade pattern holds at six of nine grid points. The three points where it appears not to hold are all cases where coordination collapses entirely at the perturbed baseline (high costs, low patience, or both), so mean coordination timing is undefined and the cascade mechanism is vacuously broken rather than substantively contradicted. Across every region of parameter space where coordination is feasible, increasing $\lambda_{US}$ reduces US period-one adoption while simultaneously raising others' and accelerating timing. The cascade is therefore structural: it reflects the United States' position as the pivotal second-mover whose credible patience anchors others' best-response calculations, not a local artefact of the SMM-calibrated parameter vector.
+The cascade pattern holds at six of nine grid points. The three non-holds all sit at $\alpha_c$ scalings of 1.00 or 1.25 combined with non-positive discount shifts, and all share the same underlying failure mode: coordination success collapses in the high-$\lambda_{US}$ regime (success rate below 0.05 at $\lambda_{US}=5.0$), so the timing comparison between the endpoints is vacuous rather than substantively contradicted. When the coalition fails to form, the timing measure carries no information, and the $\Delta\sigma_{EU}(1)$ and $\Delta\sigma_{CN}(1)$ diagnostics contract toward zero because neither bloc responds strongly to a US anchoring to a collapsed state. Across every region of parameter space where coordination remains feasible, increasing $\lambda_{US}$ reduces US period-one adoption while simultaneously raising others' and accelerating timing. The cascade is therefore structural: it reflects the United States' position as the pivotal second-mover whose credible patience anchors others' best-response calculations, not a local artefact of the SMM-calibrated parameter vector.
 
 \clearpage
 \needspace{12em}
 \subsection{Discount Ordering Robustness}
 
-The bloc-level discount factors in the baseline (EU 0.85 > CN 0.80 > US 0.75 > RoW 0.70) are anchored to a narrative argument about institutional credibility rather than to measured time preferences.\footnote{The crossing values reported in this appendix are computed on a coarser sweep grid (14 points, 250 Monte Carlo draws per point) than the main marginal sweeps in Section~5.2 (denser grid, $n=1{,}000$ MC draws). The joint US--China crossing therefore appears here as $+5.2\%$ rather than the $+6.75\%$ reported in Table~\ref{tab:sweep_crossings}; both values describe the same underlying fixed point, and the difference reflects the resolution at which the success-rate curve is interpolated. The qualitative ordering of levers and the cross-configuration comparisons within this appendix are unaffected.} Two concerns follow. The first is that the patience-dominates finding could be an artefact of the specific \emph{ordering}: if the US were assigned higher patience than China, the binding constraint would shift, and US patience would no longer appear as the strongest individual lever. The second is that the uniform 0.05 per-bloc \emph{spacing} between horizons is also a convenience choice: if the bloc horizons were compressed into a tighter range or expanded into a wider one, the joint patience channel might lose its leading position. This appendix tests both concerns across eight alternative configurations, including the US--CN flip, a fully equalised vector, US-most-patient and China-most-patient orderings, and three spacing variants (compressed to 0.78--0.82, compressed to uniform 0.02 gaps, and expanded to uniform 0.08 gaps). At each configuration the SMM-calibrated cardinal vector is held fixed and only the discount factors change; sweep crossings are reported as percentage shifts from each configuration's own baseline rather than a hardcoded global default.
+The bloc-level discount factors in the baseline (EU 0.85 > CN 0.80 > US 0.75 > RoW 0.70) are anchored to a narrative argument about institutional credibility rather than to measured time preferences.\footnote{The crossing values reported in this appendix are computed on a coarser sweep grid (14 points, 250 Monte Carlo draws per point) than the main marginal sweeps in Section~5.2 (denser grid, $n=1{,}000$ MC draws). The joint US/China crossing therefore appears here as $+5.2\%$ rather than the $+6.75\%$ reported in Table~\ref{tab:sweep_crossings}; both values describe the same underlying fixed point, and the difference reflects the resolution at which the success-rate curve is interpolated. The qualitative ordering of levers and the cross-configuration comparisons within this appendix are unaffected.} Two concerns follow. The first is that the patience-dominates finding could be an artefact of the specific \emph{ordering}: if the US were assigned higher patience than China, the binding constraint would shift, and US patience would no longer appear as the strongest individual lever. The second is that the uniform 0.05 per-bloc \emph{spacing} between horizons is also a convenience choice: if the bloc horizons were compressed into a tighter range or expanded into a wider one, the joint patience channel might lose its leading position. This appendix tests both concerns across eight alternative configurations, including the US/CN flip, a fully equalised vector, US-most-patient and China-most-patient orderings, and three spacing variants (compressed to 0.78/0.82, compressed to uniform 0.02 gaps, and expanded to uniform 0.08 gaps). At each configuration the SMM-calibrated cardinal vector is held fixed and only the discount factors change; sweep crossings are reported as percentage shifts from each configuration's own baseline rather than a hardcoded global default.
 
 \FloatBarrier
-\input{../results/dissertation/table_discount_ordering_robustness.tex}
+% \input{../results/dissertation/table_discount_ordering_robustness.tex}  % TODO: regenerate
 \FloatBarrier
 
-The joint US--China patience channel reaches the 90\% coordination frontier across every configuration tested. In the challenging environments (baseline, US--CN flipped, all-equal, and compressed uniform 0.02) the joint channel crosses with shifts of 3.4--5.2\% while global cost reduction requires 8.5--16.1\%. In the three permissive configurations (US-most-patient, China-most-patient, compressed 0.78--0.82) the success rate already sits above 0.86 and the system either reaches 90\% with a small additional shift or is already there. The expanded uniform-0.08 spacing is the most demanding environment by a wide margin: pulling the bloc horizons apart drops the US to 0.70 and RoW to 0.62, and the baseline success rate collapses to 0.02. Even here the joint channel reaches 90\% at $+17.5\%$ while global cost reduction needs $-23.9\%$, and the individual $\delta_{CN}$ and $\delta_{EU}$ channels are absent entirely. The joint channel is the cheapest 90\% lever in every case.
+The joint US/China patience channel reaches the 90\% coordination frontier across every configuration tested. In the challenging environments (baseline, US/CN flipped, all-equal, and compressed uniform 0.02) the joint channel crosses with shifts of 3.4\% to 5.2\% while global cost reduction requires 8.5\% to 16.1\%. In the three permissive configurations (US-most-patient, China-most-patient, compressed 0.78/0.82) the success rate already sits above 0.86 and the system either reaches 90\% with a small additional shift or is already there. The expanded uniform-0.08 spacing is the most demanding environment by a wide margin: pulling the bloc horizons apart drops the US to 0.70 and RoW to 0.62, and the baseline success rate collapses to 0.02. Even here the joint channel reaches 90\% at $+17.5\%$ while global cost reduction needs $-23.9\%$, and the individual $\delta_{CN}$ and $\delta_{EU}$ channels are absent entirely. The joint channel is the cheapest 90\% lever in every case.
 
-The US--CN flip is the most informative single ordering test. Swapping the discount factors so the US is the more patient of the two pivotal blocs (0.80 vs 0.75) flips which individual bloc is the binding constraint: $\delta_{US}$ now reaches 90\% with a 5.8\% shift while $\delta_{CN}$ requires 8.2\%, exactly the reverse of the baseline. The joint channel crosses at the same 5.2\% in either ordering. The two uniform-spacing tests extend the same conclusion to the range axis: a 0.02-gap vector preserves the hierarchy at a smaller scale, and a 0.08-gap vector preserves it at a much larger scale even as the system is otherwise close to total coordination failure. The right reading of the patience-dominates result is therefore not US-specific and not spacing-specific but pivotality-specific: the cheapest individual lever is whichever pivotal bloc starts at the lower discount factor and acts as the binding constraint on coalition formation, and the joint channel's efficiency is structural rather than contingent on which bloc is currently lagging or on how tightly the bloc horizons are spaced.
+The US/CN flip is the most informative single ordering test. Swapping the discount factors so the US is the more patient of the two pivotal blocs (0.80 vs 0.75) flips which individual bloc is the binding constraint: $\delta_{US}$ now reaches 90\% with a 5.8\% shift while $\delta_{CN}$ requires 8.2\%, exactly the reverse of the baseline. The joint channel crosses at the same 5.2\% in either ordering. The two uniform-spacing tests extend the same conclusion to the range axis: a 0.02-gap vector preserves the hierarchy at a smaller scale, and a 0.08-gap vector preserves it at a much larger scale even as the system is otherwise close to total coordination failure. The right reading of the patience-dominates result is therefore not US-specific and not spacing-specific but pivotality-specific: the cheapest individual lever is whichever pivotal bloc starts at the lower discount factor and acts as the binding constraint on coalition formation, and the joint channel's efficiency is structural rather than contingent on which bloc is currently lagging or on how tightly the bloc horizons are spaced.
 
 % ============================================================
 %  REFERENCES
@@ -1060,48 +1059,48 @@ The US--CN flip is the most informative single ordering test. Swapping the disco
 \begin{list}{}{\setlength\leftmargin{1.5em}\setlength\itemindent{-1.5em}\setlength\itemsep{0.4em}}
 
 \item Acemoglu, D., Aghion, P., Bursztyn, L., and Hemous, D. (2012). The environment and directed
-technical change. \textit{American Economic Review}, 102(1), 131--166.
+technical change. \textit{American Economic Review}, 102(1), 131-166.
 
 \item Ameli, N., Drummond, P., Bisaro, A., Grubb, M., and Chenet, H. (2021). Climate finance and
 disclosure for institutional investors: why transparency is not enough. \textit{Climatic Change},
-165(1), 1--22.
+165(1), 1-22.
 
 \item Backstrand, K. and Elgstrom, O. (2013). The EU's role in climate change negotiations: from leader
-to leadiator. \textit{Journal of European Public Policy}, 20(10), 1369--1386.
+to leadiator. \textit{Journal of European Public Policy}, 20(10), 1369-1386.
 
 \item Barrett, S. (1994). Self-enforcing international environmental agreements. \textit{Oxford Economic
-Papers}, 46, 878--894.
+Papers}, 46, 878-894.
 
 \item Belsley, D. A., Kuh, E., and Welsch, R. E. (1980). \textit{Regression Diagnostics: Identifying
 Influential Data and Sources of Collinearity}. Wiley, New York.
 
 \item Burke, M., Hsiang, S. M., and Miguel, E. (2015). Global non-linear effect of temperature on
-economic production. \textit{Nature}, 527(7577), 235--239.
+economic production. \textit{Nature}, 527(7577), 235-239.
 
 \item Carraro, C. and Siniscalco, D. (1993). Strategies for the international protection of the environment.
-\textit{Journal of Public Economics}, 52(3), 309--328.
+\textit{Journal of Public Economics}, 52(3), 309-328.
 
 \item Comin, D. and Hobijn, B. (2010). An exploration of technology diffusion. \textit{American Economic
-Review}, 100(5), 2031--2059.
+Review}, 100(5), 2031-2059.
 
 \item Falkner, R. (2016). The Paris Agreement and the new logic of international climate politics.
-\textit{International Affairs}, 92(5), 1107--1125.
+\textit{International Affairs}, 92(5), 1107-1125.
 
 \item Farmer, J. D., Hepburn, C., Ives, M. C., Hale, T., Wetzer, T., Mealy, P., Rafaty, R., Srivastav, S.,
 and Way, R. (2019). Sensitive intervention points in the post-carbon transition. \textit{Science},
-364(6436), 132--134.
+364(6436), 132-134.
 
 \item Goeree, J. K., Holt, C. A., and Palfrey, T. R. (2003). Risk averse behavior in generalized matching
-pennies games. \textit{Games and Economic Behavior}, 45(1), 97--113.
+pennies games. \textit{Games and Economic Behavior}, 45(1), 97-113.
 
 \item Grubb, M., Drummond, P., and Hughes, N. (2021). \textit{Planetary Economics: Energy, Climate
 Change and the Three Domains of Sustainable Development}. Routledge, London.
 
 \item Hansen, L. P. (1982). Large sample properties of generalised method of moments estimators.
-\textit{Econometrica}, 50(4), 1029--1054.
+\textit{Econometrica}, 50(4), 1029-1054.
 
 \item Harstad, B. (2016). The market for conservation and other hostages. \textit{Journal of Political
-Economy}, 124(6), 1500--1537.
+Economy}, 124(6), 1500-1537.
 
 \item IEA (2021). \textit{Net Zero by 2050: A Roadmap for the Global Energy Sector}. International Energy
 Agency, Paris.
@@ -1109,7 +1108,7 @@ Agency, Paris.
 \item IEA (2025). \textit{World Energy Outlook 2025}. International Energy Agency, Paris.
 
 \item Iman, R. L. and Conover, W. J. (1987). A measure of top-down correlation. \textit{Technometrics},
-29(3), 351--357.
+29(3), 351-357.
 
 \item IPCC (2021). \textit{Climate Change 2021: The Physical Science Basis. Contribution of Working Group
 I to the Sixth Assessment Report}. Cambridge University Press, Cambridge.
@@ -1118,53 +1117,53 @@ I to the Sixth Assessment Report}. Cambridge University Press, Cambridge.
 Agency, Abu Dhabi.
 
 \item Keohane, R. O. and Victor, D. G. (2011). The regime complex for climate change.
-\textit{Perspectives on Politics}, 9(1), 7--23.
+\textit{Perspectives on Politics}, 9(1), 7-23.
 
 \item Lenton, T. M., Rockstr\"{o}m, J., Gaffney, O., Rahmstorf, S., Richardson, K., Steffen, W.,
-and Schellnhuber, H. J. (2019). Climate tipping points --- too risky to bet against.
-\textit{Nature}, 575(7784), 592--595.
+and Schellnhuber, H. J. (2019). Climate tipping points: too risky to bet against.
+\textit{Nature}, 575(7784), 592-595.
 
 \item Kolstad, C. D. (2007). Systematic uncertainty in self-enforcing international environmental
-agreements. \textit{Journal of Environmental Economics and Management}, 53(1), 68--79.
+agreements. \textit{Journal of Environmental Economics and Management}, 53(1), 68-79.
 
 \item McFadden, D. (1989). A method of simulated moments for estimation of discrete response models
-without numerical integration. \textit{Econometrica}, 57(5), 995--1026.
+without numerical integration. \textit{Econometrica}, 57(5), 995-1026.
 
 \item McKelvey, R. D. and Palfrey, T. R. (1995). Quantal response equilibria for normal form games.
-\textit{Games and Economic Behavior}, 10(1), 6--38.
+\textit{Games and Economic Behavior}, 10(1), 6-38.
 
 \item Milkoreit, M., Hodbod, J., Baggio, J., Benessaiah, K., Calder\'{o}n-Contreras, R., Donges, J. F.,
 Mathieu, J. L., Rocha, J. C., Schoon, M., and Werners, S. E. (2018). Defining tipping points for
 social-ecological systems scholarship. \textit{Environmental Research Letters}, 13(3), 033005.
 
 \item Nelder, J. A. and Mead, R. (1965). A simplex method for function minimization. \textit{Computer
-Journal}, 7(4), 308--313.
+Journal}, 7(4), 308-313.
 
 \item Nordhaus, W. D. (2007). A review of the Stern Review on the economics of climate change.
-\textit{Journal of Economic Literature}, 45(3), 686--702.
+\textit{Journal of Economic Literature}, 45(3), 686-702.
 
 \item Nordhaus, W. D. (2015). Climate clubs: overcoming free-riding in international climate policy.
-\textit{American Economic Review}, 105(4), 1339--1370.
+\textit{American Economic Review}, 105(4), 1339-1370.
 
 \item Otto, I. M., Donges, J. F., Cremades, R., Bhowmik, A., Hewitt, R. J., Lucht, W., Rockstrom, J.,
 Allerberger, F., McCaffrey, M., Doe, S. S. P., Lenferna, A., Moran, N., van Vuuren, D. P., and
 Schellnhuber, H. J. (2020). Social tipping dynamics for stabilising Earth's climate by 2050.
-\textit{Proceedings of the National Academy of Sciences}, 117(5), 2354--2365.
+\textit{Proceedings of the National Academy of Sciences}, 117(5), 2354-2365.
 
 \item Putnam, R. D. (1988). Diplomacy and domestic politics: the logic of two-level games.
-\textit{International Organization}, 42(3), 427--460.
+\textit{International Organization}, 42(3), 427-460.
 
 \item Rubin, E. S., Azevedo, I. M. L., Jaramillo, P., and Yeh, S. (2015). A review of learning rates for
-electricity supply technologies. \textit{Energy Policy}, 86, 198--218.
+electricity supply technologies. \textit{Energy Policy}, 86, 198-218.
 
 \item Saltelli, A., Ratto, M., Andres, T., Campolongo, F., Cariboni, J., Gatelli, D., Saisana, M., and
 Tarantola, S. (2008). \textit{Global Sensitivity Analysis: The Primer}. Wiley, Chichester.
 
 \item Sharpe, S. and Lenton, T. M. (2021). Upward-scaling tipping cascades to meet climate goals:
-plausible grounds for social optimism. \textit{Climatic Change}, 164(3), 1--16.
+plausible grounds for social optimism. \textit{Climatic Change}, 164(3), 1-16.
 
 \item Way, R., Ives, M. C., Mealy, P., and Farmer, J. D. (2022). Empirically grounded technology
-forecasts and the energy transition. \textit{Joule}, 6(9), 2057--2082.
+forecasts and the energy transition. \textit{Joule}, 6(9), 2057-2082.
 
 \item World Bank (2026). \textit{World Development Indicators}. World Bank Group, Washington DC.
 

@@ -28,6 +28,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from itertools import product as iproduct
+from multiprocessing import Pool, cpu_count
 
 warnings.filterwarnings("ignore")
 
@@ -147,6 +148,27 @@ def calibrate_at_phi(phi, raw, weights, verbose=True):
     return best
 
 
+def _phi_worker(args):
+    """Pool worker: calibrate one φ and return the row dict."""
+    phi, raw, weights = args
+    best = calibrate_at_phi(phi, raw, weights, verbose=False)
+    ac, a_spill, ad, ab = best.x
+    m = compute_moments_at_phi(best.x, raw, weights, phi)
+    row = {
+        "phi": round(float(phi), 2),
+        "alpha_c": round(ac, 4),
+        "alpha_spill": round(a_spill, 4),
+        "alpha_d": round(ad, 4),
+        "alpha_b": round(ab, 4),
+        "objective": round(best.fun, 6),
+    }
+    for name, val in zip(MOMENT_NAMES, m):
+        row[f"model_{name}"] = round(float(val), 4)
+    row["at_bound"] = any(v < lo + 0.05 or v > hi - 0.05
+                          for v, (lo, hi) in zip(best.x, BOUNDS))
+    return row
+
+
 # ── Main ──────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -162,29 +184,19 @@ if __name__ == "__main__":
 
     PHI_GRID = np.linspace(0.0, 1.0, 11)  # 0.0, 0.1, ..., 1.0
 
-    print(f"\nSweeping φ over {len(PHI_GRID)} values, 2-start SMM at each...\n")
+    n_workers = min(len(PHI_GRID), cpu_count())
+    print(f"\nSweeping φ over {len(PHI_GRID)} values, 2-start SMM at each "
+          f"({n_workers} parallel workers)...\n")
 
-    rows = []
-    for phi in PHI_GRID:
-        best = calibrate_at_phi(phi, raw, weights, verbose=True)
-        ac, a_spill, ad, ab = best.x
-        m = compute_moments_at_phi(best.x, raw, weights, phi)
-
-        row = {
-            "phi": round(phi, 2),
-            "alpha_c": round(ac, 4),
-            "alpha_spill": round(a_spill, 4),
-            "alpha_d": round(ad, 4),
-            "alpha_b": round(ab, 4),
-            "objective": round(best.fun, 6),
-        }
-        for name, val in zip(MOMENT_NAMES, m):
-            row[f"model_{name}"] = round(float(val), 4)
-
-        at_bound = any(v < lo + 0.05 or v > hi - 0.05
-                       for v, (lo, hi) in zip(best.x, BOUNDS))
-        row["at_bound"] = at_bound
-        rows.append(row)
+    tasks = [(phi, raw, weights) for phi in PHI_GRID]
+    with Pool(processes=n_workers) as pool:
+        rows = []
+        for row in pool.imap_unordered(_phi_worker, tasks):
+            vals = ", ".join(f"{n}={row[f'alpha_{k}']:.4f}"
+                             for n, k in zip(PARAM_NAMES, ["c", "d", "spill", "b"]))
+            print(f"  φ={row['phi']:.2f}  obj={row['objective']:.6f}  [{vals}]")
+            rows.append(row)
+    rows.sort(key=lambda r: r["phi"])
 
     df = pd.DataFrame(rows)
     csv_path = os.path.join(OUT_DIR, "phi_sweep_calibration.csv")

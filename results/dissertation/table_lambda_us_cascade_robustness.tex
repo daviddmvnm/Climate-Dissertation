@@ -1,0 +1,21 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Robustness of the $\lambda_{US}$ cascade across a $3\times 3$ grid of perturbed cost ($\alpha_c$) and patience ($\delta$) environments. At each grid point, $\lambda_{US}$ is swept from 0.5 to 5.0 with other blocs' $\lambda$ held at the SMM baseline; reported values are the high-minus-low differences. The cascade holds if all four diagnostics take the expected sign ($\Delta\sigma_{US}(1)<0$, $\Delta\sigma_{EU}(1)>0$, $\Delta\sigma_{CN}(1)>0$, $\Delta\,\text{timing}<0$). Grid points where coordination collapses entirely at both endpoints are marked ``collapse''; the cascade is vacuously undefined there rather than violated.}
+\label{tab:lambda_us_cascade_robustness}
+\begin{tabular}{cccccccc}
+\toprule
+$\alpha_c$ scale & $\delta$ shift & $\Delta\sigma_{US}(1)$ & $\Delta\sigma_{EU}(1)$ & $\Delta\sigma_{CN}(1)$ & $\Delta\,\text{timing}$ & Success (lo / hi) & Verdict \\
+\midrule
+0.75 & -0.05 & -0.223 & +0.113 & +0.195 & -0.37 & 0.91 / 0.93 & \checkmark \\
+0.75 & +0.00 & -0.226 & +0.077 & +0.394 & -0.75 & 0.98 / 1.00 & \checkmark \\
+0.75 & +0.05 & -0.207 & +0.040 & +0.388 & -0.82 & 0.99 / 1.00 & \checkmark \\
+1.00 & -0.05 & -0.164 & -0.018 & +0.002 & -0.25 & 0.63 / 0.03 & $\times$ \\
+1.00 & +0.00 & -0.196 & +0.201 & +0.240 & -0.51 & 0.77 / 0.92 & \checkmark \\
+1.00 & +0.05 & -0.206 & +0.084 & +0.458 & -0.96 & 0.96 / 1.00 & \checkmark \\
+1.25 & -0.05 & -0.103 & -0.006 & -0.000 & -- & 0.21 / 0.00 & collapse \\
+1.25 & +0.00 & -0.142 & -0.018 & +0.001 & +0.45 & 0.49 / 0.01 & $\times$ \\
+1.25 & +0.05 & -0.186 & +0.260 & +0.424 & -0.69 & 0.71 / 0.97 & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}

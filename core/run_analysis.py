@@ -574,6 +574,7 @@ GSA_RANGES = {
     "gamma":          (0.10, 0.45),
     "eta":            (8.0,  22.0),
     "kappa":          (0.02,  0.20),
+    "phi":            (0.0,   1.0),
 }
 
 GSA_OUTCOMES = ["success_rate", "mean_W", "mean_coord_time",
@@ -621,6 +622,7 @@ def run_gsa(params, raw, weights, n_samples, gsa_mc, seed=42):
             "gamma":    draw["gamma"],
             "eta":      draw["eta"],
             "kappa":    draw["kappa"],
+            "phi":      draw["phi"],
         })
         
         try:
