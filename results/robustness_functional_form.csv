@@ -1,4 +1,0 @@
-spec,success_rate,mean_W,cross90_δ_CN,cross90_δ_US,cross90_δ_US=δ_CN,cross90_Global cost,cross90_θ (threshold),cross90_γ (learning),top_gsa_1,gsa_rho_1,top_gsa_2,gsa_rho_2,top_gsa_3,gsa_rho_3
-Sigmoid,0.625,0.6644,18.75,10.31,6.75,-15.45,-17.05,132.72,theta,-0.422,kappa,0.342,cost_US,-0.332
-Linear,0.004,0.3498,,,,-51.82,,,theta,-0.37,kappa,0.322,cost_US,-0.252
-Convex,0.358,0.5075,,21.21,22.58,-33.64,,,kappa,0.403,cost_US,-0.391,delta_US,0.31
