@@ -277,7 +277,7 @@ tex = r"""\begin{table}[htbp]
     rf"$\alpha_b$ & Coordination benefit scaling    & {b['ab']:.4f} & Estimated \\[6pt]"  + "\n"
 ) + r"""\multicolumn{4}{l}{\textit{Fixed structural}} \\[2pt]
 $\phi$     & Spillover mixing (cost-learning vs pressure) & 0.50 & Fixed \\
-$\lambda$  & QRE rationality (homogeneous)   & 1.54   & Fixed \\
+$\lambda$  & QRE rationality (homogeneous)   & 1.50   & Fixed \\
 $\delta_{US}$  & US discount factor          & 0.75   & Fixed \\
 $\delta_{EU}$  & EU discount factor          & 0.85   & Fixed \\
 $\delta_{CN}$  & China discount factor       & 0.80   & Fixed \\
