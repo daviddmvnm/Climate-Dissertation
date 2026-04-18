@@ -138,6 +138,14 @@ def inclusive_value(QA: float, QD: float, lam: float) -> float:
 
 # ─── SOLVER ───────────────────────────────────────────────────────
 
+# Damping factor for the QRE fixed-point iteration:
+#   σ_{k+1} = α·F(σ_k) + (1-α)·σ_k
+# Preserves the fixed points of F but ensures convergence across the
+# full GSA parameter range, where the undamped map can be non-contractive
+# at isolated nodes. See Appendix A.1.
+QRE_DAMPING = 0.5
+
+
 def solve_model(params: GameParams):
     """
     Backward induction + QRE fixed-point solver.
@@ -221,8 +229,12 @@ def solve_model(params: GameParams):
                     new_QD[i]     = qd
                     new_sigmas[i] = qre_probability(qa, qd, params.lam[p])
 
-                max_diff = max(abs(new_sigmas[i] - current_sigmas[i]) for i in active)
-                current_sigmas = new_sigmas
+                damped_sigmas = {
+                    i: QRE_DAMPING * new_sigmas[i] + (1 - QRE_DAMPING) * current_sigmas[i]
+                    for i in active
+                }
+                max_diff = max(abs(damped_sigmas[i] - current_sigmas[i]) for i in active)
+                current_sigmas = damped_sigmas
                 if max_diff < 1e-8:
                     break
 
