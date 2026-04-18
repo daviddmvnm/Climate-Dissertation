@@ -25,7 +25,8 @@ PLAYERS = ["US", "EU", "CN", "RoW"]
 class GameParams:
     T: int = 10
     theta: float = 0.85
-    
+    phi: float = 0.5
+
     lam: Dict[str, float] = field(default_factory=lambda: {
         "US": 1.5, "EU": 1.5, "CN": 1.5, "RoW": 1.5
     })
@@ -38,6 +39,9 @@ class GameParams:
         "US": 0.28, "EU": 0.22, "CN": 0.30, "RoW": 0.20
     })
     costs:    Dict[str, float] = field(default_factory=lambda: {
+        "US": 3.0, "EU": 2.5, "CN": 3.5, "RoW": 8.0
+    })
+    c_tilde:  Dict[str, float] = field(default_factory=lambda: {
         "US": 3.0, "EU": 2.5, "CN": 3.5, "RoW": 8.0
     })
     damages:  Dict[str, float] = field(default_factory=lambda: {
@@ -86,7 +90,7 @@ def threshold_sigmoid(W: float, params: GameParams) -> float:
 # ─── FLOW PAYOFFS ─────────────────────────────────────────────────
 
 def adoption_cost(player: str, W: float, params: GameParams) -> float:
-    return params.costs[player] * (1 - params.gamma * W)
+    return params.costs[player] - params.c_tilde[player] * (1.0 - params.phi) * params.gamma * W
 
 
 def climate_damage(player: str, t: int, W: float, params: GameParams) -> float:
@@ -95,9 +99,7 @@ def climate_damage(player: str, t: int, W: float, params: GameParams) -> float:
 
 
 def political_pressure(player: str, t: int, W: float, params: GameParams) -> float:
-    if t <= 1:
-        return 0.0
-    return params.pressure[player] * W
+    return params.phi * params.pressure[player] * W
 
 
 def stabilisation_benefit(W: float, params: GameParams) -> float:

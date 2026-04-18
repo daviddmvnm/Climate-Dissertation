@@ -223,19 +223,18 @@ BLOC_COLOURS = {
 
 def build_params(raw, weights, ac, ad, ap, ab, eps=EPSILON,
                  theta=THETA, eta=ETA, lam=LAMBDA,
-                 gamma=GAMMA, kappa=KAPPA,
+                 gamma=GAMMA, kappa=KAPPA, phi=0.5,
                  discount=None, lambda_map=None):
     if discount is None:
         discount = DISCOUNT
-        
-    # If no specific lambda_map is provided, we default all players to the base 'lam'
+
     if lambda_map is None:
         lambda_map = {bloc: lam for bloc in PLAYERS}
 
     max_gpc = raw["gdp_per_capita"].max()
     bl_intensity = ((raw["carbon_intensity"] * raw["total_gdp"]).sum()
                     / raw["total_gdp"].sum())
-    
+
     ref_dev = raw.loc[REF_BLOC, "gdp_per_capita"] / max_gpc
     ref_eff_ci = (raw.loc[REF_BLOC, "carbon_intensity"] * ref_dev
                   + bl_intensity * (1 - ref_dev))
@@ -243,28 +242,32 @@ def build_params(raw, weights, ac, ad, ap, ab, eps=EPSILON,
     ref_composite = ref_eff_ci * ref_aff
 
     ag_ref = raw.loc[REF_BLOC, "ag_value_pct"]
-    c, d, p = {}, {}, {}
+    c, c_tilde, d, p = {}, {}, {}, {}
     for bloc in PLAYERS:
         dev = raw.loc[bloc, "gdp_per_capita"] / max_gpc
         eff_ci = raw.loc[bloc, "carbon_intensity"] * dev + bl_intensity * (1 - dev)
         afford = (max_gpc / raw.loc[bloc, "gdp_per_capita"]) ** eps
         composite = eff_ci * afford
-        c[bloc] = ac * (composite / ref_composite)
-        d[bloc] = ad * (raw.loc[bloc, "ag_value_pct"] / ag_ref)
-        p[bloc] = ap * (raw.loc[bloc, "trade_pct"] / 100.0)
+        ratio_cost = composite / ref_composite
+        c[bloc]       = ac * ratio_cost
+        c_tilde[bloc] = ap * ratio_cost
+        d[bloc]       = ad * (raw.loc[bloc, "ag_value_pct"] / ag_ref)
+        p[bloc]       = ap * (raw.loc[bloc, "trade_pct"] / 100.0)
 
     return GameParams(
         T=10,
-        theta=theta, 
-        lam=lambda_map, # Now passes the dict {bloc: lambda}
+        theta=theta,
+        phi=phi,
+        lam=lambda_map,
         b=ab,
-        gamma=gamma, 
-        kappa=kappa, 
+        gamma=gamma,
+        kappa=kappa,
         eta=eta,
-        weights=weights, 
-        costs=c, 
+        weights=weights,
+        costs=c,
+        c_tilde=c_tilde,
         damages=d,
-        pressure=p, 
+        pressure=p,
         discount=dict(discount),
     )
 

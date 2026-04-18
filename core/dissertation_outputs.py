@@ -295,6 +295,64 @@ $\kappa$   & Damage accumulation speed       & 0.05   & Fixed \\
 write_tex("table_smm_alphas.tex", tex)
 
 # ══════════════════════════════════════════════════════════════════
+# TABLE — SMM STANDARD ERRORS & CONFIDENCE INTERVALS
+# ══════════════════════════════════════════════════════════════════
+_se_path = os.path.join(ROOT_DIR, "results", "smm_standard_errors.csv")
+if os.path.exists(_se_path):
+    print("Generating Table: SMM standard errors...")
+    df_se = pd.read_csv(_se_path)
+
+    symbol_map = {
+        "α_c": r"$\alpha_c$",
+        "α_d": r"$\alpha_d$",
+        "α_p": r"$\alpha_p$",
+        "α_b": r"$\alpha_b$",
+    }
+
+    header = [
+        "Parameter", r"$\hat{\theta}$",
+        r"SE$_{\text{asym}}$", r"95\% CI (asymptotic)",
+        r"95\% CI (bootstrap)",
+    ]
+    rows = []
+    for _, r in df_se.iterrows():
+        sym = symbol_map.get(r["param"], r["param"])
+        if r.get("on_bound", False):
+            sym = sym + r"$^{\dagger}$"
+        est = f"{r['estimate']:.4f}"
+        se  = f"{r['se_sandwich']:.4f}"
+        ci_a = f"[{r['ci95_lo_sand']:.3f},\\,{r['ci95_hi_sand']:.3f}]"
+        if "ci95_lo_boot" in df_se.columns and not pd.isna(r.get("ci95_lo_boot")):
+            ci_b = f"[{r['ci95_lo_boot']:.3f},\\,{r['ci95_hi_boot']:.3f}]"
+        else:
+            ci_b = "--"
+        rows.append([sym, est, se, ci_a, ci_b])
+
+    boot_n = int(df_se["boot_n"].iloc[0]) if "boot_n" in df_se.columns else None
+    note = (
+        "Asymptotic SE via the SMM sandwich "
+        r"$(G'WG)^{-1}G'W\Omega W G (G'WG)^{-1}$, with "
+        r"$G=\partial m/\partial\theta$ by central differences at $\hat\theta$, "
+        r"$W=\mathrm{diag}(w_k)$ the objective weights, and "
+        r"$\Omega=\mathrm{diag}(\sigma_k^2)$ with $\sigma_k=\min(1/\sqrt{w_k},\,0.5\,|m_k|)$ "
+        r"so low-weight moments do not dominate. Asymptotic CIs are clipped to "
+        r"the SMM search bounds $[0.1,10]$. "
+        r"Parametric bootstrap draws $m^*\sim\mathcal{N}(m,\,\Omega)$ and re-runs "
+        r"Nelder--Mead from $\hat\theta$; CI is the 2.5/97.5 percentile"
+        + (f" over $B={boot_n}$ replications." if boot_n else ".")
+        + r" $^{\dagger}$ estimate lies on a search bound; asymptotic normality "
+        r"does not apply and the bootstrap CI should be preferred."
+    )
+    tex_se = tex_table(
+        caption="Standard errors and 95\\% confidence intervals for SMM parameter estimates.",
+        label="smm_standard_errors",
+        header=header, rows=rows, note=note,
+    )
+    write_tex("table_smm_standard_errors.tex", tex_se)
+else:
+    print("  (skipping SMM SE table — run calibration/smm_standard_errors.py first)")
+
+# ══════════════════════════════════════════════════════════════════
 # TABLE — SWEEP CROSSINGS
 # ══════════════════════════════════════════════════════════════════
 print("Generating Table: Sweep crossings...")
@@ -626,7 +684,8 @@ def compile_table_png(tex_fragment_path, out_png_path):
 
 print("Compiling table PNGs via pdflatex...")
 for tbl in ["table_smm_moments", "table_equilibrium_uniqueness", "table_gsa_correlations",
-            "table_smm_alphas", "table_sweep_crossings", "table_baseline_diagnostics",
+            "table_smm_alphas", "table_smm_standard_errors",
+            "table_sweep_crossings", "table_baseline_diagnostics",
             "table_functional_form_robustness", "table_layer1_params", "table_lambda_spillover"]:
     tex_path = os.path.join(OUT, f"{tbl}.tex")
     png_path = os.path.join(OUT, f"{tbl}.png")
