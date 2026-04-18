@@ -1,18 +1,26 @@
-\begin{table}[htbp]
+\begin{table}[ht]
 \centering
-\small
-\caption{QRE Equilibrium Uniqueness Tests at SMM-calibrated parameters. Tests 1--2: fixed-point re-initialised from 20 random starts plus simplex corners at every active game-tree node. Test 3: spectral radius of the logit best-response Jacobian $J_F$ at $\sigma^*$.}
+\caption{QRE Equilibrium Uniqueness Tests at SMM-calibrated parameters.
+Test 1--2: fixed-point iteration from 20 random initialisations
+plus simplex corners at every active game-tree node.
+Test 3: spectral radius of the logit best-response Jacobian at $\sigma^*$.}
 \label{tab:equilibrium_uniqueness}
-\begin{tabular}{lrrr}
+\begin{tabular}{llcl}
 \toprule
-\textbf{Test} & \textbf{Criterion} & \textbf{Result} & \textbf{Verdict} \\
+Test & Criterion & Result & Verdict \\
 \midrule
-Multi-start (Tests 1--2) & Max deviation from $\sigma^*$ across all nodes & 6.70e-08 & Pass \\
- & Non-converged initialisations & 0 &  \\
- & Active nodes tested & 150 &  \\
+1--2: Multiple initialisations &
+  Max deviation from $\sigma^*_{0.5}$ across all nodes $< 10^{-5}$ &
+  7.52e-08 &
+  \textbf{PASS} \\
+  & Non-converged initialisations & 0 & \\
+  & Nodes tested & 150 & \\
 \midrule
-Eigenvalue stability (Test 3) & Max spectral radius $\rho(J_F)$ (need $< 1$) & 0.8607 & Pass \\
- & Nodes with $\geq 2$ active players & 110 &  \\
+3: Eigenvalue stability &
+  Spectral radius $\rho(J_F) < 1$ at all nodes &
+  $\rho_{\max} = 0.8842$ &
+  \textbf{PASS} \\
+  & Nodes with $\geq 2$ active players & 110 & \\
 \bottomrule
 \end{tabular}
 \end{table}
