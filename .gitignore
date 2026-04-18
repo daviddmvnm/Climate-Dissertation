@@ -1,0 +1,51 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.toc
+
+# Large generated outputs (regenerable)
+*.pdf
+!dissertation_writeup.pdf
+latex/
+results/figures/
+results/dissertation/*.png
+
+# Notebooks (outputs can be large)
+*.ipynb
+
+# LaTeX sources/tables (regenerable from scripts; PDF is the artefact)
+*.tex
+
+# Editor/OS/agent caches
+.DS_Store
+.vscode/
+.idea/
+.claude/
+.cursor/
+*.swp
+*.swo
+*~
+*.bak
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Misc
+*.zip
+*.mkv
+*.tmp
+core/game_diagram.py
+.gitignore
