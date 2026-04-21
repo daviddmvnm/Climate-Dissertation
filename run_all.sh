@@ -37,6 +37,7 @@ run robustness/phi_sweep_calibration.py
 run robustness/spec_robustness.py
 run robustness/discount_ordering_robustness.py
 run robustness/cascade_robustness.py
+run robustness/row_payoff_robustness.py
 
 echo ""
 echo "══════════════════════════════════════════"

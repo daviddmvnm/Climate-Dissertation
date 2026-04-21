@@ -1,0 +1,5 @@
+archetype,label,m_cost,m_damage,m_pressure,delta_RoW,success,mean_timing,p1_EU,p1_CN,p1_US,p1_RoW,δ_US=δ_CN_90,Global cost_90,δ_US_90,δ_CN_90,δ_EU_90,θ_90
+baseline,Baseline (RoW-as-calibrated),1.0,1.0,1.0,0.7,0.745,4.0,0.255,0.145,0.075,0.005,4.71,-8.46,8.2,5.77,7.24,-20.19
+india_like,"India-like (high cost, short horizon)",1.25,1.0,1.0,0.65,0.5,3.45,0.23,0.08,0.07,0.0,9.19,-16.15,12.83,10.1,,-24.53
+asean_like,ASEAN-like (trade- and damage-exposed),1.0,1.4,1.4,0.7,0.85,4.03,0.27,0.14,0.05,0.005,4.71,-8.46,3.59,1.44,2.72,-2.89
+latam_like,"LATAM-like (longer horizon, moderate)",1.1,1.15,1.0,0.78,0.86,3.98,0.27,0.145,0.05,0.045,4.71,-8.46,3.59,1.44,2.72,-11.54
