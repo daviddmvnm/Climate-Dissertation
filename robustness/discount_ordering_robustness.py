@@ -53,7 +53,7 @@ os.makedirs(os.path.dirname(OUT_TEX), exist_ok=True)
 # ── Eight discount configurations ─────────────────────────────────────────
 # Each entry: (key, pretty_label, {bloc: δ})
 CONFIGS = [
-    ("baseline",          "Baseline (EU>CN>US>RoW)",
+    ("baseline",          "Baseline (EU$>$CN$>$US$>$RoW)",
         {"EU": 0.85, "CN": 0.80, "US": 0.75, "RoW": 0.70}),
     ("us_cn_flip",        "US/CN flipped",
         {"EU": 0.85, "US": 0.80, "CN": 0.75, "RoW": 0.70}),
